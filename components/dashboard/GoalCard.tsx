@@ -10,7 +10,7 @@ import type { GoalWithProgress } from "@/types";
 interface Props {
   goal: GoalWithProgress;
   deviceToken: string;
-  onLogged: (pointsEarned: number) => void;
+  onLogged: (newTotal: number) => void;
 }
 
 export function GoalCard({ goal, deviceToken, onLogged }: Props) {
@@ -37,7 +37,7 @@ export function GoalCard({ goal, deviceToken, onLogged }: Props) {
     } else {
       toast.success(`Logged! ${data.progress}/${data.target} done.`);
     }
-    onLogged(data.points_earned ?? 0);
+    onLogged(data.new_total ?? 0);
   }
 
   return (

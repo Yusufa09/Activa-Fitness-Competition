@@ -29,7 +29,7 @@ export function useMemberSession(): SessionResult {
 
     setDeviceToken(stored.device_token);
 
-    fetch(`/api/member/session?token=${stored.device_token}`)
+    fetch(`/api/member/session?token=${stored.device_token}`, { cache: "no-store" })
       .then((res) => (res.ok ? res.json() : null))
       .then((data: MemberState | null) => {
         if (!data) {

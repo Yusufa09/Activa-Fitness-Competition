@@ -129,5 +129,6 @@ export async function POST(req: NextRequest) {
     target: goal.target_count,
     completed: justCompleted,
     points_earned: pointsToAward,
+    new_total: enrollment.points + pointsToAward,
   });
 }

@@ -32,10 +32,10 @@ export default function DashboardPage() {
     router.replace("/");
   }
 
-  function handleLogged(pointsEarned: number) {
-    if (pointsEarned > 0) setMyPoints((p) => p + pointsEarned); // instant feedback
+  function handleLogged(newTotal: number) {
+    setMyPoints(newTotal); // authoritative total from the server response
     refetchGoals();
-    refetch(); // reconcile with server
+    refetch(); // refresh goals progress + leaderboard
   }
 
   if (loading || !state) {
