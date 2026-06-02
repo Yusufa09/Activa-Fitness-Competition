@@ -51,7 +51,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       <aside className="w-56 bg-slate-900 flex flex-col py-6 px-4 fixed h-full">
         <div className="flex items-center gap-2 mb-8 px-2">
           <Dumbbell className="w-6 h-6 text-orange-400" />
-          <span className="text-white font-bold text-sm">Gym Admin</span>
+          <span className="text-white font-bold text-sm">Orange Theory Admin</span>
         </div>
 
         <nav className="flex-1 space-y-1">

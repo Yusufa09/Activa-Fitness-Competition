@@ -6,7 +6,7 @@ import "./globals.css";
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
 
 export const metadata: Metadata = {
-  title: "Gym Challenge — Team Points Tracker",
+  title: "Orange Theory Gym Competition",
   description: "Earn points for healthy habits and compete with your team.",
 };
 

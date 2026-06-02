@@ -42,8 +42,7 @@ export default function JoinPage() {
           <div className="inline-flex items-center justify-center w-16 h-16 bg-orange-600 rounded-2xl mb-4 shadow-lg">
             <Dumbbell className="w-8 h-8 text-white" />
           </div>
-          <h1 className="text-3xl font-bold text-slate-800">Gym Challenge</h1>
-          <p className="text-slate-500 mt-2">Earn points. Power up your team.</p>
+          <h1 className="text-3xl font-bold text-slate-800">Orange Theory Gym Competition</h1>
         </div>
 
         <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-8">

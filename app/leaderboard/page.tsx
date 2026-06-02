@@ -1,9 +1,15 @@
+import { MemberNav } from "@/components/MemberNav";
 import { LeaderboardStage } from "@/components/leaderboard/LeaderboardStage";
 
 export const metadata = {
-  title: "Team Leaderboard — Gym Challenge",
+  title: "Leaderboard — Orange Theory Gym Competition",
 };
 
 export default function LeaderboardPage() {
-  return <LeaderboardStage />;
+  return (
+    <>
+      <MemberNav />
+      <LeaderboardStage />
+    </>
+  );
 }

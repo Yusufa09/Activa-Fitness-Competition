@@ -10,7 +10,7 @@ export function LeaderboardStage() {
   const maxPoints = teams[0]?.total_points ?? 1;
 
   return (
-    <div className="min-h-screen bg-white flex flex-col">
+    <div className="min-h-[calc(100vh-3.5rem)] bg-white flex flex-col">
       <header className="pt-10 pb-6 px-6 text-center">
         <div className="inline-flex items-center gap-3 bg-orange-50 border border-orange-100 rounded-2xl px-6 py-3">
           <Dumbbell className="w-7 h-7 text-orange-500" />
@@ -46,11 +46,6 @@ export function LeaderboardStage() {
         )}
       </main>
 
-      <footer className="pb-6 text-center text-slate-300 text-xs">
-        <a href="/" className="hover:text-slate-500 transition-colors">
-          Join the challenge →
-        </a>
-      </footer>
     </div>
   );
 }

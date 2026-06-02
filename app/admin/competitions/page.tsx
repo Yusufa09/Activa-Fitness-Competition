@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { CompetitionForm } from "@/components/admin/CompetitionForm";
-import { Plus, Play, Square, Trash2 } from "lucide-react";
+import { Plus, Play, Square, Trash2, Pencil } from "lucide-react";
 import { toast } from "sonner";
 import { TEAM_COLORS } from "@/lib/points";
 
@@ -22,6 +22,7 @@ export default function CompetitionsPage() {
   const [competitions, setCompetitions] = useState<AdminCompetition[]>([]);
   const [loading, setLoading] = useState(true);
   const [formOpen, setFormOpen] = useState(false);
+  const [editing, setEditing] = useState<AdminCompetition | null>(null);
 
   async function fetchData() {
     const res = await fetch("/api/admin/competitions");
@@ -59,7 +60,7 @@ export default function CompetitionsPage() {
           <h1 className="text-2xl font-bold text-slate-800">Competitions</h1>
           <p className="text-slate-500 text-sm mt-0.5">One competition runs at a time.</p>
         </div>
-        <Button size="sm" onClick={() => setFormOpen(true)} className="bg-orange-600 hover:bg-orange-700 text-white">
+        <Button size="sm" onClick={() => { setEditing(null); setFormOpen(true); }} className="bg-orange-600 hover:bg-orange-700 text-white">
           <Plus className="w-4 h-4 mr-1.5" /> New Competition
         </Button>
       </div>
@@ -93,6 +94,9 @@ export default function CompetitionsPage() {
                   </div>
                 </div>
                 <div className="flex flex-col gap-1.5 flex-shrink-0">
+                  <Button variant="outline" size="sm" onClick={() => { setEditing(c); setFormOpen(true); }} className="text-slate-600 text-xs">
+                    <Pencil className="w-3.5 h-3.5 mr-1.5" /> Edit
+                  </Button>
                   {c.is_active ? (
                     <Button variant="outline" size="sm" onClick={() => patch(c.id, "end")} className="text-slate-600 text-xs">
                       <Square className="w-3.5 h-3.5 mr-1.5" /> End
@@ -112,7 +116,12 @@ export default function CompetitionsPage() {
         </div>
       )}
 
-      <CompetitionForm open={formOpen} onClose={() => setFormOpen(false)} onSaved={fetchData} />
+      <CompetitionForm
+        open={formOpen}
+        competition={editing}
+        onClose={() => setFormOpen(false)}
+        onSaved={fetchData}
+      />
     </div>
   );
 }

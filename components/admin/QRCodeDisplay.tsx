@@ -15,10 +15,10 @@ export function QRCodeDisplay({ url, label = "Scan to join" }: Props) {
     if (!printWindow) return;
     const svg = document.getElementById("gym-qr")?.outerHTML ?? "";
     printWindow.document.write(`
-      <html><head><title>Gym Challenge — Join</title></head>
+      <html><head><title>Orange Theory Gym Competition — Join</title></head>
       <body style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;font-family:sans-serif;gap:16px;">
         ${svg}
-        <p style="font-size:24px;font-weight:bold;">Scan to Join the Challenge</p>
+        <p style="font-size:24px;font-weight:bold;">Scan to Join the Competition</p>
         <p style="font-size:14px;color:#666;">${url}</p>
         <script>window.print();window.close();</script>
       </body></html>

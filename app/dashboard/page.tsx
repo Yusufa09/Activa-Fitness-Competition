@@ -8,13 +8,10 @@ import { CompetitionBanner } from "@/components/dashboard/CompetitionBanner";
 import { GoalCard } from "@/components/dashboard/GoalCard";
 import { MiniLeaderboard } from "@/components/dashboard/MiniLeaderboard";
 import { NoActiveCompetition } from "@/components/dashboard/NoActiveCompetition";
-import { clearSession } from "@/lib/member-session";
-import { useRouter } from "next/navigation";
-import { Dumbbell, LogOut, Trophy } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { MemberNav } from "@/components/MemberNav";
+import { Dumbbell } from "lucide-react";
 
 export default function DashboardPage() {
-  const router = useRouter();
   const { state, deviceToken, loading, refetch } = useMemberSession();
 
   const competitionId = state?.competition?.id ?? null;
@@ -26,11 +23,6 @@ export default function DashboardPage() {
   useEffect(() => {
     if (state?.enrollment) setMyPoints(state.enrollment.points);
   }, [state?.enrollment]);
-
-  function handleSignOut() {
-    clearSession();
-    router.replace("/");
-  }
 
   function handleLogged(newTotal: number) {
     setMyPoints(newTotal); // authoritative total from the server response
@@ -50,30 +42,7 @@ export default function DashboardPage() {
 
   return (
     <main className="min-h-screen bg-white pb-12">
-      <nav className="bg-white border-b border-slate-200 px-4 py-3 flex items-center justify-between sticky top-0 z-10">
-        <div className="flex items-center gap-2">
-          <Dumbbell className="w-5 h-5 text-orange-600" />
-          <span className="font-bold text-slate-800 text-sm">Gym Challenge</span>
-        </div>
-        <div className="flex items-center gap-1">
-          <a
-            href="/leaderboard"
-            className="flex items-center gap-1.5 text-slate-500 hover:text-orange-600 text-xs font-medium px-3 py-1.5 rounded-md hover:bg-orange-50 transition-colors"
-          >
-            <Trophy className="w-3.5 h-3.5" />
-            Standings
-          </a>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={handleSignOut}
-            className="text-slate-400 hover:text-slate-600 text-xs"
-          >
-            <LogOut className="w-3.5 h-3.5 mr-1" />
-            Leave
-          </Button>
-        </div>
-      </nav>
+      <MemberNav />
 
       <div className="max-w-lg mx-auto px-4 pt-6 space-y-4">
         {!hasCompetition ? (
