@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import Link from "next/link";
-import { Dumbbell, LayoutDashboard, Trophy, Users, LogOut } from "lucide-react";
+import { Dumbbell, LayoutDashboard, Trophy, Users, LogOut, CalendarRange } from "lucide-react";
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
@@ -32,24 +32,25 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   if (checking) {
     return (
-      <div className="min-h-screen bg-slate-900 flex items-center justify-center">
-        <Dumbbell className="w-8 h-8 text-teal-500 animate-pulse" />
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <Dumbbell className="w-8 h-8 text-orange-500 animate-pulse" />
       </div>
     );
   }
 
   const navItems = [
     { href: "/admin/dashboard", label: "Dashboard", icon: LayoutDashboard },
-    { href: "/admin/challenges", label: "Challenges", icon: Trophy },
+    { href: "/admin/competitions", label: "Competitions", icon: CalendarRange },
+    { href: "/admin/goals", label: "Goals", icon: Trophy },
     { href: "/admin/teams", label: "Teams", icon: Users },
   ];
 
   return (
-    <div className="min-h-screen bg-slate-50 flex">
+    <div className="min-h-screen bg-white flex">
       {/* Sidebar */}
       <aside className="w-56 bg-slate-900 flex flex-col py-6 px-4 fixed h-full">
         <div className="flex items-center gap-2 mb-8 px-2">
-          <Dumbbell className="w-6 h-6 text-teal-400" />
+          <Dumbbell className="w-6 h-6 text-orange-400" />
           <span className="text-white font-bold text-sm">Gym Admin</span>
         </div>
 
@@ -60,7 +61,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               href={href}
               className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
                 pathname === href
-                  ? "bg-teal-600 text-white"
+                  ? "bg-orange-600 text-white"
                   : "text-slate-400 hover:bg-white/5 hover:text-white"
               }`}
             >

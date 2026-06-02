@@ -2,6 +2,7 @@ export const dynamic = "force-dynamic";
 
 import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { buildMemberState } from "@/lib/enrollment";
 
 export async function GET(req: NextRequest) {
   const token = req.nextUrl.searchParams.get("token");
@@ -14,7 +15,7 @@ export async function GET(req: NextRequest) {
 
   const { data: member, error } = await supabase
     .from("members")
-    .select("*, team:teams(*)")
+    .select("*")
     .eq("device_token", token)
     .single();
 
@@ -22,5 +23,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: "Session not found." }, { status: 404 });
   }
 
-  return NextResponse.json({ member });
+  // Resolves active competition + auto-enrolls if they joined mid-competition
+  const state = await buildMemberState(supabase, member);
+  return NextResponse.json(state);
 }

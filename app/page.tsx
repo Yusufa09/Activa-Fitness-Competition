@@ -26,8 +26,8 @@ export default function JoinPage() {
 
   if (checking) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-teal-50">
-        <div className="flex flex-col items-center gap-3 text-teal-600">
+      <div className="min-h-screen flex items-center justify-center bg-white">
+        <div className="flex flex-col items-center gap-3 text-orange-600">
           <Dumbbell className="w-10 h-10 animate-pulse" />
           <p className="text-slate-500 text-sm">Loading...</p>
         </div>
@@ -36,24 +36,24 @@ export default function JoinPage() {
   }
 
   return (
-    <main className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-b from-teal-50 to-slate-100 px-4 py-12">
+    <main className="min-h-screen flex flex-col items-center justify-center bg-white px-4 py-12">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-teal-600 rounded-2xl mb-4 shadow-lg">
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-orange-600 rounded-2xl mb-4 shadow-lg">
             <Dumbbell className="w-8 h-8 text-white" />
           </div>
           <h1 className="text-3xl font-bold text-slate-800">Gym Challenge</h1>
-          <p className="text-slate-500 mt-2">Earn points. Beat your team&apos;s record.</p>
+          <p className="text-slate-500 mt-2">Earn points. Power up your team.</p>
         </div>
 
         <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-8">
-          <h2 className="text-xl font-semibold text-slate-800 mb-6">Join Your Team</h2>
+          <h2 className="text-xl font-semibold text-slate-800 mb-6">Sign In</h2>
           <JoinForm />
         </div>
 
         <p className="text-center text-sm text-slate-400 mt-6">
           Gym manager?{" "}
-          <a href="/admin" className="text-teal-600 hover:underline font-medium">
+          <a href="/admin" className="text-orange-600 hover:underline font-medium">
             Admin login →
           </a>
         </p>

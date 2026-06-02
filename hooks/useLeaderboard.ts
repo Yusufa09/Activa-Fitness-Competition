@@ -2,19 +2,35 @@
 
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
-import type { LeaderboardTeam } from "@/types";
+import type { LeaderboardTeam, Competition } from "@/types";
 
 export function useLeaderboard() {
   const [teams, setTeams] = useState<LeaderboardTeam[]>([]);
+  const [competition, setCompetition] = useState<Competition | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const supabase = createClient();
 
     async function fetchTeams() {
+      const { data: comp } = await supabase
+        .from("competitions")
+        .select("*")
+        .eq("is_active", true)
+        .single();
+
+      setCompetition(comp ?? null);
+
+      if (!comp) {
+        setTeams([]);
+        setLoading(false);
+        return;
+      }
+
       const { data } = await supabase
         .from("teams")
-        .select("*, members(count)")
+        .select("*, enrollments(count)")
+        .eq("competition_id", comp.id)
         .order("total_points", { ascending: false });
 
       if (data) {
@@ -22,7 +38,7 @@ export function useLeaderboard() {
           data.map((t, i) => ({
             ...t,
             rank: i + 1,
-            member_count: (t.members as unknown as [{ count: number }])[0]?.count ?? 0,
+            member_count: (t.enrollments as unknown as [{ count: number }])[0]?.count ?? 0,
           }))
         );
       }
@@ -31,7 +47,6 @@ export function useLeaderboard() {
 
     fetchTeams();
 
-    // Real-time subscription on teams table
     const channel = supabase
       .channel("leaderboard-teams")
       .on(
@@ -54,5 +69,5 @@ export function useLeaderboard() {
     };
   }, []);
 
-  return { teams, loading };
+  return { teams, competition, loading };
 }

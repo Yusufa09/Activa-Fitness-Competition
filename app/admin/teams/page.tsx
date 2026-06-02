@@ -4,100 +4,93 @@ import { useEffect, useState } from "react";
 import { QRCodeDisplay } from "@/components/admin/QRCodeDisplay";
 import { TEAM_COLORS } from "@/lib/points";
 import { ChevronDown, ChevronUp } from "lucide-react";
-import type { TeamColor } from "@/types";
 
-interface MemberRow {
-  id: string;
-  display_name: string;
-  total_points: number;
-  created_at: string;
-}
-
-interface TeamWithMembers {
+interface MemberRow { display_name: string; created_at: string }
+interface EnrollmentRow { id: string; points: number; member: MemberRow }
+interface TeamRow {
   id: string;
   name: string;
-  join_code: string;
-  color: TeamColor;
+  color: string;
   total_points: number;
-  members: MemberRow[];
+  enrollments: EnrollmentRow[];
 }
+interface CompetitionRow { id: string; name: string }
 
 export default function TeamsPage() {
-  const [teams, setTeams] = useState<TeamWithMembers[]>([]);
+  const [teams, setTeams] = useState<TeamRow[]>([]);
+  const [competition, setCompetition] = useState<CompetitionRow | null>(null);
   const [loading, setLoading] = useState(true);
   const [expanded, setExpanded] = useState<string | null>(null);
+  const [appUrl, setAppUrl] = useState("");
 
   useEffect(() => {
+    setAppUrl(process.env.NEXT_PUBLIC_APP_URL || window.location.origin);
     fetch("/api/admin/teams")
       .then((r) => r.json())
       .then((d) => {
         setTeams(d.teams ?? []);
+        setCompetition(d.competition ?? null);
         setLoading(false);
       });
   }, []);
 
+  if (!loading && !competition) {
+    return (
+      <div>
+        <h1 className="text-2xl font-bold text-slate-800 mb-6">Teams</h1>
+        <div className="bg-white rounded-xl border border-slate-200 p-8 text-center text-slate-400">
+          No active competition. Start one in{" "}
+          <a href="/admin/competitions" className="text-orange-600 hover:underline">Competitions</a>{" "}
+          to see teams.
+        </div>
+      </div>
+    );
+  }
+
+  const maxPoints = Math.max(...teams.map((t) => t.total_points), 1);
+
   return (
     <div>
-      <h1 className="text-2xl font-bold text-slate-800 mb-6">Teams</h1>
+      <div className="flex items-start justify-between mb-6 gap-6 flex-wrap">
+        <div>
+          <h1 className="text-2xl font-bold text-slate-800">Teams</h1>
+          {competition && <p className="text-slate-500 text-sm mt-0.5">{competition.name}</p>}
+        </div>
+        {appUrl && <QRCodeDisplay url={appUrl} label="Members scan to sign in" />}
+      </div>
 
       {loading ? (
-        <div className="space-y-4">
-          {[1, 2, 3, 4].map((i) => (
-            <div key={i} className="h-32 bg-white rounded-xl border border-slate-200 animate-pulse" />
-          ))}
-        </div>
+        <div className="space-y-4">{[1, 2, 3, 4].map((i) => <div key={i} className="h-24 bg-white rounded-xl border border-slate-200 animate-pulse" />)}</div>
       ) : (
         <div className="space-y-4">
           {teams.map((team) => {
-            const colors = TEAM_COLORS[team.color] ?? TEAM_COLORS.teal;
+            const colors = TEAM_COLORS[team.color] ?? TEAM_COLORS.orange;
             const isExpanded = expanded === team.id;
-
             return (
               <div key={team.id} className="bg-white rounded-xl border border-slate-200 overflow-hidden">
-                <div className={`p-5 flex gap-5 ${colors.bg}`}>
-                  {/* QR Code */}
-                  <div className="flex-shrink-0">
-                    <QRCodeDisplay teamName={team.name} joinCode={team.join_code} />
-                  </div>
-
-                  {/* Team info */}
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-start justify-between">
-                      <div>
-                        <h2 className={`text-xl font-bold ${colors.text}`}>{team.name}</h2>
-                        <p className="text-slate-500 text-sm">{team.members.length} members</p>
-                      </div>
-                      <div className="text-right">
-                        <p className={`text-3xl font-black ${colors.text}`}>
-                          {team.total_points.toLocaleString()}
-                        </p>
-                        <p className="text-slate-400 text-xs">total points</p>
-                      </div>
+                <div className={`p-5 ${colors.bg}`}>
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <h2 className={`text-xl font-bold ${colors.text}`}>{team.name}</h2>
+                      <p className="text-slate-500 text-sm">{team.enrollments?.length ?? 0} members</p>
                     </div>
-
-                    <div className="mt-3">
-                      <div className="h-2 bg-white/50 rounded-full overflow-hidden">
-                        <div
-                          className={`h-full ${colors.bar} rounded-full`}
-                          style={{ width: `${Math.min(100, (team.total_points / Math.max(...teams.map((t) => t.total_points), 1)) * 100)}%` }}
-                        />
-                      </div>
+                    <div className="text-right">
+                      <p className={`text-3xl font-black ${colors.text}`}>{team.total_points.toLocaleString()}</p>
+                      <p className="text-slate-400 text-xs">total points</p>
                     </div>
-
-                    <button
-                      onClick={() => setExpanded(isExpanded ? null : team.id)}
-                      className={`mt-4 flex items-center gap-1 text-sm font-medium ${colors.text} hover:underline`}
-                    >
-                      {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-                      {isExpanded ? "Hide" : "Show"} members
-                    </button>
                   </div>
+                  <div className="mt-3 h-2 bg-white/50 rounded-full overflow-hidden">
+                    <div className={`h-full ${colors.bar} rounded-full`} style={{ width: `${(team.total_points / maxPoints) * 100}%` }} />
+                  </div>
+                  <button onClick={() => setExpanded(isExpanded ? null : team.id)} className={`mt-4 flex items-center gap-1 text-sm font-medium ${colors.text} hover:underline`}>
+                    {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                    {isExpanded ? "Hide" : "Show"} members
+                  </button>
                 </div>
 
-                {/* Member list */}
                 {isExpanded && (
                   <div className="border-t border-slate-200">
-                    {team.members.length === 0 ? (
+                    {(team.enrollments?.length ?? 0) === 0 ? (
                       <p className="p-4 text-slate-400 text-sm text-center">No members yet.</p>
                     ) : (
                       <table className="w-full text-sm">
@@ -109,19 +102,13 @@ export default function TeamsPage() {
                           </tr>
                         </thead>
                         <tbody>
-                          {[...team.members]
-                            .sort((a, b) => b.total_points - a.total_points)
-                            .map((member) => (
-                              <tr key={member.id} className="border-t border-slate-100">
-                                <td className="px-4 py-2.5 text-slate-700 font-medium">{member.display_name}</td>
-                                <td className={`px-4 py-2.5 text-right font-bold ${colors.text}`}>
-                                  {member.total_points}
-                                </td>
-                                <td className="px-4 py-2.5 text-right text-slate-400">
-                                  {new Date(member.created_at).toLocaleDateString()}
-                                </td>
-                              </tr>
-                            ))}
+                          {[...team.enrollments].sort((a, b) => b.points - a.points).map((en) => (
+                            <tr key={en.id} className="border-t border-slate-100">
+                              <td className="px-4 py-2.5 text-slate-700 font-medium">{en.member.display_name}</td>
+                              <td className={`px-4 py-2.5 text-right font-bold ${colors.text}`}>{en.points}</td>
+                              <td className="px-4 py-2.5 text-right text-slate-400">{new Date(en.member.created_at).toLocaleDateString()}</td>
+                            </tr>
+                          ))}
                         </tbody>
                       </table>
                     )}

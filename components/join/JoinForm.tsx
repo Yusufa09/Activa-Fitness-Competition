@@ -5,18 +5,11 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { saveSession } from "@/lib/member-session";
-import type { MemberSession } from "@/types";
+import { saveSession, getDeviceToken } from "@/lib/member-session";
 
-interface JoinFormProps {
-  prefilledCode?: string;
-  prefilledTeamName?: string;
-}
-
-export function JoinForm({ prefilledCode, prefilledTeamName }: JoinFormProps) {
+export function JoinForm() {
   const router = useRouter();
   const [name, setName] = useState("");
-  const [code, setCode] = useState(prefilledCode ?? "");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -28,17 +21,13 @@ export function JoinForm({ prefilledCode, prefilledTeamName }: JoinFormProps) {
       setError("Please enter your name.");
       return;
     }
-    if (!code.trim()) {
-      setError("Please enter your team code.");
-      return;
-    }
 
     setLoading(true);
 
     const res = await fetch("/api/member/register", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ display_name: name.trim(), join_code: code.trim() }),
+      body: JSON.stringify({ display_name: name.trim(), device_token: getDeviceToken() }),
     });
 
     const data = await res.json();
@@ -49,15 +38,11 @@ export function JoinForm({ prefilledCode, prefilledTeamName }: JoinFormProps) {
       return;
     }
 
-    const session: MemberSession = {
+    saveSession({
       device_token: data.device_token,
       member_id: data.member.id,
       display_name: data.member.display_name,
-      team_id: data.member.team_id,
-      team_name: data.member.team.name,
-      team_color: data.member.team.color,
-    };
-    saveSession(session);
+    });
     router.push("/dashboard");
   }
 
@@ -73,33 +58,12 @@ export function JoinForm({ prefilledCode, prefilledTeamName }: JoinFormProps) {
           value={name}
           onChange={(e) => setName(e.target.value)}
           disabled={loading}
-          autoComplete="given-name"
-          className="border-slate-300 focus:border-teal-500 focus:ring-teal-500"
+          autoComplete="name"
+          className="border-slate-300 focus:border-orange-500 focus:ring-orange-500"
         />
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="code" className="text-slate-700 font-medium">
-          Team Code
-        </Label>
-        {prefilledCode && prefilledTeamName ? (
-          <div className="flex items-center gap-3 rounded-lg border border-teal-300 bg-teal-50 px-4 py-3">
-            <span className="text-2xl">🏃</span>
-            <div>
-              <p className="font-semibold text-teal-800">{prefilledTeamName}</p>
-              <p className="text-sm text-teal-600">Code: {prefilledCode}</p>
-            </div>
-          </div>
-        ) : (
-          <Input
-            id="code"
-            placeholder="e.g. ALPHA"
-            value={code}
-            onChange={(e) => setCode(e.target.value.toUpperCase())}
-            disabled={loading}
-            className="border-slate-300 focus:border-teal-500 focus:ring-teal-500 uppercase tracking-widest"
-          />
-        )}
+        <p className="text-xs text-slate-400">
+          You&apos;ll be placed on a team automatically.
+        </p>
       </div>
 
       {error && (
@@ -111,9 +75,9 @@ export function JoinForm({ prefilledCode, prefilledTeamName }: JoinFormProps) {
       <Button
         type="submit"
         disabled={loading}
-        className="w-full bg-teal-600 hover:bg-teal-700 text-white font-semibold py-3 text-base"
+        className="w-full bg-orange-600 hover:bg-orange-700 text-white font-semibold py-3 text-base"
       >
-        {loading ? "Joining..." : "Join Team →"}
+        {loading ? "Signing in..." : "Let's Go →"}
       </Button>
     </form>
   );

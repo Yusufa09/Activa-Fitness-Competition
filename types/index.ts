@@ -1,9 +1,20 @@
-export type TeamColor = "teal" | "violet" | "amber" | "sky";
+export type TeamColor = "orange" | "rose" | "blue" | "emerald" | "violet" | "amber" | "sky" | "teal";
+
+export type RefreshInterval = "daily" | "weekly";
+
+export interface Competition {
+  id: string;
+  name: string;
+  start_date: string;
+  end_date: string;
+  is_active: boolean;
+  created_at: string;
+}
 
 export interface Team {
   id: string;
+  competition_id: string;
   name: string;
-  join_code: string;
   color: TeamColor;
   total_points: number;
   created_at: string;
@@ -12,46 +23,48 @@ export interface Team {
 export interface Member {
   id: string;
   display_name: string;
-  team_id: string;
   device_token: string;
-  total_points: number;
   created_at: string;
-  team?: Team;
 }
 
-export type ChallengeType = "weekly" | "attendance";
-
-export interface Challenge {
+export interface Enrollment {
   id: string;
+  member_id: string;
+  competition_id: string;
+  team_id: string;
+  points: number;
+  joined_at: string;
+}
+
+export interface Goal {
+  id: string;
+  competition_id: string;
   title: string;
   description: string | null;
   points: number;
-  week_start: string;
-  week_end: string;
-  challenge_type: ChallengeType;
+  target_count: number;
+  is_refreshable: boolean;
+  refresh_interval: RefreshInterval | null;
+  starts_at: string | null;
+  ends_at: string | null;
   is_active: boolean;
   created_at: string;
 }
 
-export interface ActivityLog {
+export interface GoalLog {
   id: string;
-  member_id: string;
-  challenge_id: string;
+  enrollment_id: string;
+  goal_id: string;
+  period_key: string;
+  count: number;
   points_earned: number;
-  logged_at: string;
+  updated_at: string;
 }
 
-export interface AttendanceLog {
-  id: string;
-  member_id: string;
-  week_start: string;
-  visit_count: number;
-  logged_at: string;
-}
-
-// Enriched challenge with member's completion status
-export interface ChallengeWithStatus extends Challenge {
-  completed: boolean;
+// Goal enriched with the member's current-period progress
+export interface GoalWithProgress extends Goal {
+  progress: number; // count completed this period
+  completed: boolean; // progress >= target_count
 }
 
 // Member session stored in localStorage
@@ -59,29 +72,13 @@ export interface MemberSession {
   device_token: string;
   member_id: string;
   display_name: string;
-  team_id: string;
-  team_name: string;
-  team_color: TeamColor;
 }
 
-// API response shapes
-export interface ApiError {
-  error: string;
-}
-
-export interface RegisterResponse {
+// Resolved state returned by register/session APIs
+export interface MemberState {
   member: Member;
-  device_token: string;
-}
-
-export interface SessionResponse {
-  member: Member & { team: Team };
-}
-
-export interface LogActivityResponse {
-  success: boolean;
-  points_earned: number;
-  new_total: number;
+  competition: Competition | null;
+  enrollment: (Enrollment & { team: Team }) | null;
 }
 
 export interface LeaderboardTeam extends Team {

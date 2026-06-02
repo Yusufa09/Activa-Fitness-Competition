@@ -25,19 +25,17 @@ export function MiniLeaderboard() {
     <div className="bg-white rounded-xl border border-slate-200 p-5">
       <div className="flex items-center justify-between mb-4">
         <h3 className="font-semibold text-slate-800">Team Standings</h3>
-        <a href="/leaderboard" className="text-xs text-teal-600 hover:underline font-medium">
+        <a href="/leaderboard" className="text-xs text-orange-600 hover:underline font-medium">
           Full view →
         </a>
       </div>
       <div className="space-y-3">
         {teams.map((team) => {
-          const colors = TEAM_COLORS[team.color] ?? TEAM_COLORS.teal;
+          const colors = TEAM_COLORS[team.color] ?? TEAM_COLORS.orange;
           const barWidth = maxPoints > 0 ? Math.round((team.total_points / maxPoints) * 100) : 0;
           return (
             <div key={team.id} className="flex items-center gap-3">
-              <span className="w-5 text-center text-slate-400 text-sm font-bold">
-                {team.rank}
-              </span>
+              <span className="w-5 text-center text-slate-400 text-sm font-bold">{team.rank}</span>
               <div className="flex-1 min-w-0">
                 <div className="flex justify-between text-sm mb-1">
                   <span className={`font-medium truncate ${colors.text}`}>{team.name}</span>

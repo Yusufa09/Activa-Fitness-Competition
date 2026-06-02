@@ -3,12 +3,21 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { loadSession, clearSession, saveSession } from "@/lib/member-session";
-import type { MemberSession } from "@/types";
+import type { MemberState } from "@/types";
 
-export function useMemberSession() {
+interface SessionResult {
+  state: MemberState | null;
+  deviceToken: string | null;
+  loading: boolean;
+  refetch: () => void;
+}
+
+export function useMemberSession(): SessionResult {
   const router = useRouter();
-  const [session, setSession] = useState<MemberSession | null>(null);
+  const [state, setState] = useState<MemberState | null>(null);
+  const [deviceToken, setDeviceToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [tick, setTick] = useState(0);
 
   useEffect(() => {
     const stored = loadSession();
@@ -18,33 +27,29 @@ export function useMemberSession() {
       return;
     }
 
-    // Validate token is still valid on the server
+    setDeviceToken(stored.device_token);
+
     fetch(`/api/member/session?token=${stored.device_token}`)
       .then((res) => (res.ok ? res.json() : null))
-      .then((data) => {
+      .then((data: MemberState | null) => {
         if (!data) {
           clearSession();
           router.replace("/");
           return;
         }
-        const { member } = data;
-        const updated: MemberSession = {
+        saveSession({
           device_token: stored.device_token,
-          member_id: member.id,
-          display_name: member.display_name,
-          team_id: member.team_id,
-          team_name: member.team.name,
-          team_color: member.team.color,
-        };
-        saveSession(updated);
-        setSession(updated);
+          member_id: data.member.id,
+          display_name: data.member.display_name,
+        });
+        setState(data);
         setLoading(false);
       })
       .catch(() => {
         clearSession();
         router.replace("/");
       });
-  }, [router]);
+  }, [router, tick]);
 
-  return { session, loading };
+  return { state, deviceToken, loading, refetch: () => setTick((t) => t + 1) };
 }

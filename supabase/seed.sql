@@ -1,13 +1,33 @@
--- Seed 4 initial teams
-INSERT INTO teams (name, join_code, color) VALUES
-  ('Team Alpha',   'ALPHA',   'teal'),
-  ('Team Bravo',   'BRAVO',   'violet'),
-  ('Team Charlie', 'CHARLIE', 'amber'),
-  ('Team Delta',   'DELTA',   'sky');
+-- ============================================================
+-- SAMPLE COMPETITION  ("Spring Fitness", ~3 months from today)
+-- ============================================================
+INSERT INTO competitions (name, start_date, end_date, is_active)
+VALUES ('Spring Fitness Challenge', CURRENT_DATE, CURRENT_DATE + 90, TRUE);
 
--- Seed sample weekly challenges for the current week
--- Update the dates before running in production
-INSERT INTO challenges (title, description, points, week_start, week_end, challenge_type, is_active) VALUES
-  ('Drink 8 Glasses of Water', 'Stay hydrated! Drink at least 8 glasses of water today.', 100, CURRENT_DATE - (EXTRACT(DOW FROM CURRENT_DATE)::INTEGER - 1), CURRENT_DATE + (7 - EXTRACT(DOW FROM CURRENT_DATE)::INTEGER), 'weekly', true),
-  ('Eat a Healthy Meal', 'Prepare or choose a nutritious, balanced meal today.', 100, CURRENT_DATE - (EXTRACT(DOW FROM CURRENT_DATE)::INTEGER - 1), CURRENT_DATE + (7 - EXTRACT(DOW FROM CURRENT_DATE)::INTEGER), 'weekly', true),
-  ('Sleep 8 Hours', 'Get a full night of rest — aim for at least 8 hours of sleep.', 100, CURRENT_DATE - (EXTRACT(DOW FROM CURRENT_DATE)::INTEGER - 1), CURRENT_DATE + (7 - EXTRACT(DOW FROM CURRENT_DATE)::INTEGER), 'weekly', true);
+-- 4 teams for the competition
+INSERT INTO teams (competition_id, name, color)
+SELECT id, t.name, t.color
+FROM competitions c,
+  (VALUES
+    ('Blazers',  'orange'),
+    ('Risers',   'rose'),
+    ('Titans',   'blue'),
+    ('Surge',    'emerald')
+  ) AS t(name, color)
+WHERE c.is_active = TRUE;
+
+-- Sample goals of each kind
+INSERT INTO goals (competition_id, title, description, points, target_count, is_refreshable, refresh_interval, is_active)
+SELECT c.id, g.title, g.description, g.points, g.target_count, g.is_refreshable, g.refresh_interval, TRUE
+FROM competitions c,
+  (VALUES
+    -- Recurring daily task
+    ('Drink 8 Glasses of Water', 'Stay hydrated every day.', 50, 1, TRUE, 'daily'),
+    -- Recurring weekly task
+    ('Eat 5 Healthy Meals', 'Choose nutritious meals through the week.', 100, 1, TRUE, 'weekly'),
+    -- Multi-count goal that refreshes weekly (the old "gym attendance")
+    ('Go to the Gym 3x', 'Visit the gym three times this week.', 100, 3, TRUE, 'weekly'),
+    -- One-time task for the whole competition
+    ('Set a Fitness Goal', 'Write down a personal fitness goal for the season.', 75, 1, FALSE, NULL)
+  ) AS g(title, description, points, target_count, is_refreshable, refresh_interval)
+WHERE c.is_active = TRUE;

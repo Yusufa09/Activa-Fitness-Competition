@@ -12,17 +12,11 @@ const config: Config = {
         background: "var(--background)",
         foreground: "var(--foreground)",
         brand: {
-          primary: "#0d9488",   // teal-600
+          primary: "#ea580c",   // orange-600
           secondary: "#475569", // slate-600
-          accent: "#d97706",    // amber-600
-          light: "#f0fdfa",     // teal-50
+          accent: "#f59e0b",    // amber-500
+          light: "#fff7ed",     // orange-50
           dark: "#0f172a",      // slate-900
-        },
-        team: {
-          alpha: "#0d9488",   // teal
-          bravo: "#7c3aed",   // violet
-          charlie: "#d97706", // amber
-          delta: "#0284c7",   // sky
         },
       },
       animation: {

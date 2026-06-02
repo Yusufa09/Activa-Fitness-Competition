@@ -2,6 +2,10 @@ import type { MemberSession } from "@/types";
 
 const SESSION_KEY = "fitness_member_session";
 
+export function getDeviceToken(): string | null {
+  return loadSession()?.device_token ?? null;
+}
+
 export function saveSession(session: MemberSession): void {
   if (typeof window === "undefined") return;
   localStorage.setItem(SESSION_KEY, JSON.stringify(session));
