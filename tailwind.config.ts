@@ -5,6 +5,13 @@ const config: Config = {
     "./pages/**/*.{js,ts,jsx,tsx,mdx}",
     "./components/**/*.{js,ts,jsx,tsx,mdx}",
     "./app/**/*.{js,ts,jsx,tsx,mdx}",
+    "./lib/**/*.{js,ts,jsx,tsx}",
+    "./hooks/**/*.{js,ts,jsx,tsx}",
+  ],
+  // Team colors are referenced dynamically from TEAM_COLORS in lib/points.ts.
+  // Safelist guarantees every team's bar/badge classes are always generated.
+  safelist: [
+    { pattern: /^(bg|text|border)-(orange|rose|blue|emerald|violet|amber|sky|teal)-(50|300|500|700)$/ },
   ],
   theme: {
     extend: {
