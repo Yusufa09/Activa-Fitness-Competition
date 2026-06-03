@@ -41,6 +41,8 @@ export function useMemberSession(): SessionResult {
           device_token: stored.device_token,
           member_id: data.member.id,
           display_name: data.member.display_name,
+          gym_id: data.gym.id,
+          gym_name: data.gym.name,
         });
         setState(data);
         setLoading(false);

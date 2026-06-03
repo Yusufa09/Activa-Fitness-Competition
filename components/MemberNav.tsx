@@ -1,13 +1,19 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { clearSession } from "@/lib/member-session";
+import { clearSession, loadSession } from "@/lib/member-session";
 import { Dumbbell, LayoutGrid, Trophy, LogOut } from "lucide-react";
 
 export function MemberNav() {
   const pathname = usePathname();
   const router = useRouter();
+  const [gymName, setGymName] = useState("");
+
+  useEffect(() => {
+    setGymName(loadSession()?.gym_name ?? "");
+  }, []);
 
   function signOut() {
     clearSession();
@@ -22,9 +28,11 @@ export function MemberNav() {
   return (
     <nav className="bg-white border-b border-slate-200 sticky top-0 z-20">
       <div className="max-w-3xl mx-auto px-4 h-14 flex items-center justify-between">
-        <Link href="/dashboard" className="flex items-center gap-2">
-          <Dumbbell className="w-5 h-5 text-orange-600" />
-          <span className="font-bold text-slate-800 text-sm hidden sm:inline">Orange Theory</span>
+        <Link href="/dashboard" className="flex items-center gap-2 min-w-0">
+          <Dumbbell className="w-5 h-5 text-orange-600 flex-shrink-0" />
+          <span className="font-bold text-slate-800 text-sm truncate max-w-[40vw] sm:max-w-none">
+            {gymName || "Gym Challenge"}
+          </span>
         </Link>
 
         <div className="flex items-center gap-1">

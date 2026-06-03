@@ -4,22 +4,28 @@ import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import Link from "next/link";
-import { Dumbbell, LayoutDashboard, Trophy, Users, LogOut, CalendarRange } from "lucide-react";
+import { Dumbbell, LayoutDashboard, Trophy, Users, LogOut, CalendarRange, UserCog } from "lucide-react";
+
+const PUBLIC_PATHS = ["/admin", "/admin/signup", "/admin/accept-invite"];
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
   const [checking, setChecking] = useState(true);
+  const [gym, setGym] = useState<{ name: string; gym_code: string } | null>(null);
+
+  const isPublic = PUBLIC_PATHS.includes(pathname);
 
   useEffect(() => {
+    if (isPublic) { setChecking(false); return; }
     const supabase = createClient();
     supabase.auth.getSession().then(({ data: { session } }) => {
-      if (!session && pathname !== "/admin") {
-        router.replace("/admin");
-      }
+      if (!session) { router.replace("/admin"); return; }
       setChecking(false);
+      // Load gym name + code for the sidebar
+      fetch("/api/admin/admins").then((r) => r.json()).then((d) => d.gym && setGym(d.gym)).catch(() => {});
     });
-  }, [router, pathname]);
+  }, [router, pathname, isPublic]);
 
   async function handleSignOut() {
     const supabase = createClient();
@@ -27,8 +33,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     router.replace("/admin");
   }
 
-  // Show login page without nav
-  if (pathname === "/admin") return <>{children}</>;
+  // Public auth pages render without the admin chrome
+  if (isPublic) return <>{children}</>;
 
   if (checking) {
     return (
@@ -43,16 +49,23 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     { href: "/admin/competitions", label: "Competitions", icon: CalendarRange },
     { href: "/admin/goals", label: "Goals", icon: Trophy },
     { href: "/admin/teams", label: "Teams", icon: Users },
+    { href: "/admin/admins", label: "Admins", icon: UserCog },
   ];
 
   return (
     <div className="min-h-screen bg-white flex">
-      {/* Sidebar */}
       <aside className="w-56 bg-slate-900 flex flex-col py-6 px-4 fixed h-full">
-        <div className="flex items-center gap-2 mb-8 px-2">
-          <Dumbbell className="w-6 h-6 text-orange-400" />
-          <span className="text-white font-bold text-sm">Orange Theory Admin</span>
+        <div className="flex items-center gap-2 mb-1 px-2">
+          <Dumbbell className="w-6 h-6 text-orange-400 flex-shrink-0" />
+          <span className="text-white font-bold text-sm truncate">{gym?.name ?? "Gym Admin"}</span>
         </div>
+        {gym ? (
+          <div className="px-2 mb-7">
+            <p className="text-slate-500 text-[11px] font-mono tracking-wider">Code: {gym.gym_code}</p>
+          </div>
+        ) : (
+          <div className="mb-7" />
+        )}
 
         <nav className="flex-1 space-y-1">
           {navItems.map(({ href, label, icon: Icon }) => (
@@ -60,9 +73,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               key={href}
               href={href}
               className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
-                pathname === href
-                  ? "bg-orange-600 text-white"
-                  : "text-slate-400 hover:bg-white/5 hover:text-white"
+                pathname === href ? "bg-orange-600 text-white" : "text-slate-400 hover:bg-white/5 hover:text-white"
               }`}
             >
               <Icon className="w-4 h-4" />
@@ -80,7 +91,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         </button>
       </aside>
 
-      {/* Main content */}
       <main className="flex-1 ml-56 p-8">{children}</main>
     </div>
   );

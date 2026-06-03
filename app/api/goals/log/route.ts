@@ -17,18 +17,18 @@ export async function POST(req: NextRequest) {
 
   const supabase = createAdminClient();
 
-  const competition = await getActiveCompetition(supabase);
-  if (!competition) {
-    return NextResponse.json({ error: "No active competition." }, { status: 409 });
-  }
-
-  // Resolve member → enrollment in active competition
+  // Resolve member → their gym → active competition
   const { data: member } = await supabase
     .from("members")
-    .select("id")
+    .select("id, gym_id")
     .eq("device_token", device_token)
     .single();
   if (!member) return NextResponse.json({ error: "Session invalid." }, { status: 401 });
+
+  const competition = await getActiveCompetition(supabase, member.gym_id);
+  if (!competition) {
+    return NextResponse.json({ error: "No active competition." }, { status: 409 });
+  }
 
   const { data: enrollment } = await supabase
     .from("enrollments")

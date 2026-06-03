@@ -3,8 +3,8 @@
 import { useLeaderboard } from "@/hooks/useLeaderboard";
 import { TEAM_COLORS } from "@/lib/points";
 
-export function MiniLeaderboard() {
-  const { teams, loading } = useLeaderboard();
+export function MiniLeaderboard({ competitionId }: { competitionId: string | null }) {
+  const { teams, loading } = useLeaderboard(competitionId);
 
   if (loading) {
     return (

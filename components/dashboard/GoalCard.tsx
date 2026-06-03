@@ -32,11 +32,6 @@ export function GoalCard({ goal, deviceToken, onLogged }: Props) {
       toast.error(data.error ?? "Could not log this.");
       return;
     }
-    if (data.completed) {
-      toast.success(`+${data.points_earned} points! Nice work!`);
-    } else {
-      toast.success(`Logged! ${data.progress}/${data.target} done.`);
-    }
     onLogged(data.new_total ?? 0);
   }
 

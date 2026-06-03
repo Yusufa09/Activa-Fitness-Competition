@@ -1,13 +1,19 @@
 "use client";
 
 import { AnimatePresence } from "framer-motion";
+import { useMemberSession } from "@/hooks/useMemberSession";
 import { useLeaderboard } from "@/hooks/useLeaderboard";
 import { TeamCard } from "./TeamCard";
 import { Dumbbell } from "lucide-react";
 
 export function LeaderboardStage() {
-  const { teams, competition, loading } = useLeaderboard();
+  const { state, loading: sessionLoading } = useMemberSession();
+  const competitionId = state?.competition?.id ?? null;
+  const { teams, loading } = useLeaderboard(competitionId);
   const maxPoints = teams[0]?.total_points ?? 1;
+
+  const busy = sessionLoading || loading;
+  const competition = state?.competition ?? null;
 
   return (
     <div className="min-h-[calc(100vh-3.5rem)] bg-white flex flex-col">
@@ -24,7 +30,7 @@ export function LeaderboardStage() {
       </header>
 
       <main className="flex-1 px-4 pb-10 max-w-2xl mx-auto w-full">
-        {loading ? (
+        {busy ? (
           <div className="space-y-4">
             {[1, 2, 3, 4].map((i) => (
               <div key={i} className="h-28 bg-slate-50 border border-slate-200 rounded-2xl animate-pulse" />
@@ -45,7 +51,6 @@ export function LeaderboardStage() {
           </AnimatePresence>
         )}
       </main>
-
     </div>
   );
 }

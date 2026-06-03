@@ -2,16 +2,18 @@ export const dynamic = "force-dynamic";
 
 import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { isAdmin } from "@/lib/admin-auth";
+import { getAdminContext } from "@/lib/admin-auth";
 import { TEAM_COLOR_PALETTE } from "@/lib/points";
 
 export async function GET() {
-  if (!(await isAdmin())) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const ctx = await getAdminContext();
+  if (!ctx) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const supabase = createAdminClient();
   const { data, error } = await supabase
     .from("competitions")
     .select("*, teams(id, name, color, total_points)")
+    .eq("gym_id", ctx.gymId)
     .order("created_at", { ascending: false });
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
@@ -19,7 +21,8 @@ export async function GET() {
 }
 
 export async function POST(req: NextRequest) {
-  if (!(await isAdmin())) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const ctx = await getAdminContext();
+  if (!ctx) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const { name, start_date, end_date, team_names } = await req.json();
 
@@ -33,12 +36,12 @@ export async function POST(req: NextRequest) {
 
   const supabase = createAdminClient();
 
-  // Only one active at a time — deactivate any current active competition
-  await supabase.from("competitions").update({ is_active: false }).eq("is_active", true);
+  // Only one active at a time per gym — deactivate this gym's current active competition
+  await supabase.from("competitions").update({ is_active: false }).eq("gym_id", ctx.gymId).eq("is_active", true);
 
   const { data: competition, error } = await supabase
     .from("competitions")
-    .insert({ name: name.trim(), start_date, end_date, is_active: true })
+    .insert({ gym_id: ctx.gymId, name: name.trim(), start_date, end_date, is_active: true })
     .select()
     .single();
 
@@ -58,20 +61,22 @@ export async function POST(req: NextRequest) {
 }
 
 export async function PATCH(req: NextRequest) {
-  if (!(await isAdmin())) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const ctx = await getAdminContext();
+  if (!ctx) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const { id, action, ...updates } = await req.json();
   if (!id) return NextResponse.json({ error: "id is required." }, { status: 400 });
 
   const supabase = createAdminClient();
 
-  // Activating: deactivate others first (one active at a time)
+  // Activating: deactivate this gym's others first (one active per gym)
   if (action === "activate") {
-    await supabase.from("competitions").update({ is_active: false }).eq("is_active", true);
+    await supabase.from("competitions").update({ is_active: false }).eq("gym_id", ctx.gymId).eq("is_active", true);
     const { data, error } = await supabase
       .from("competitions")
       .update({ is_active: true })
       .eq("id", id)
+      .eq("gym_id", ctx.gymId)
       .select()
       .single();
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
@@ -83,6 +88,7 @@ export async function PATCH(req: NextRequest) {
       .from("competitions")
       .update({ is_active: false })
       .eq("id", id)
+      .eq("gym_id", ctx.gymId)
       .select()
       .single();
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
@@ -94,6 +100,7 @@ export async function PATCH(req: NextRequest) {
     .from("competitions")
     .update(updates)
     .eq("id", id)
+    .eq("gym_id", ctx.gymId)
     .select()
     .single();
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
@@ -101,13 +108,14 @@ export async function PATCH(req: NextRequest) {
 }
 
 export async function DELETE(req: NextRequest) {
-  if (!(await isAdmin())) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const ctx = await getAdminContext();
+  if (!ctx) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const { id } = await req.json();
   if (!id) return NextResponse.json({ error: "id is required." }, { status: 400 });
 
   const supabase = createAdminClient();
-  const { error } = await supabase.from("competitions").delete().eq("id", id);
+  const { error } = await supabase.from("competitions").delete().eq("id", id).eq("gym_id", ctx.gymId);
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   return NextResponse.json({ success: true });
 }

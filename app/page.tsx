@@ -9,11 +9,17 @@ import { Dumbbell } from "lucide-react";
 export default function JoinPage() {
   const router = useRouter();
   const [checking, setChecking] = useState(true);
+  const [gymCode, setGymCode] = useState<string | undefined>(undefined);
 
   useEffect(() => {
+    // Read ?gym=CODE from the URL (set by the gym's QR code)
+    const params = new URLSearchParams(window.location.search);
+    const code = params.get("gym");
+    if (code) setGymCode(code.toUpperCase());
+
     const session = loadSession();
     if (session) {
-      fetch(`/api/member/session?token=${session.device_token}`)
+      fetch(`/api/member/session?token=${session.device_token}`, { cache: "no-store" })
         .then((res) => {
           if (res.ok) router.replace("/dashboard");
           else setChecking(false);
@@ -47,7 +53,7 @@ export default function JoinPage() {
 
         <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-8">
           <h2 className="text-xl font-semibold text-slate-800 mb-6">Sign In</h2>
-          <JoinForm />
+          <JoinForm prefilledGymCode={gymCode} />
         </div>
 
         <p className="text-center text-sm text-slate-400 mt-6">

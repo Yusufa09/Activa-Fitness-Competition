@@ -1,13 +1,18 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 
+// Admin paths that must be reachable while logged out
+const PUBLIC_ADMIN_PATHS = ["/admin/signup", "/admin/accept-invite"];
+
 export async function middleware(request: NextRequest) {
   let response = NextResponse.next({ request });
+  const path = request.nextUrl.pathname;
 
-  // Only protect /admin/* but not /admin itself (the login page)
+  // Protect /admin/* except the login page and public auth pages
   if (
-    request.nextUrl.pathname.startsWith("/admin/") &&
-    request.nextUrl.pathname !== "/admin/"
+    path.startsWith("/admin/") &&
+    path !== "/admin/" &&
+    !PUBLIC_ADMIN_PATHS.some((p) => path.startsWith(p))
   ) {
     const supabase = createServerClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,

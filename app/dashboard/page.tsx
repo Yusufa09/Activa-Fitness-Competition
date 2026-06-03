@@ -81,7 +81,7 @@ export default function DashboardPage() {
               )}
             </div>
 
-            <MiniLeaderboard />
+            <MiniLeaderboard competitionId={state.competition!.id} />
           </>
         )}
       </div>

@@ -1,23 +1,74 @@
 -- ============================================================
--- CLEAN SLATE (safe to re-run — drops old objects first)
+-- v3 SCHEMA — Multi-gym platform with password accounts
+-- Running this WIPES existing data. Run in Supabase SQL Editor.
 -- ============================================================
+
 DROP TABLE IF EXISTS goal_logs CASCADE;
 DROP TABLE IF EXISTS activity_logs CASCADE;
 DROP TABLE IF EXISTS attendance_logs CASCADE;
 DROP TABLE IF EXISTS goals CASCADE;
 DROP TABLE IF EXISTS challenges CASCADE;
 DROP TABLE IF EXISTS enrollments CASCADE;
-DROP TABLE IF EXISTS members CASCADE;
 DROP TABLE IF EXISTS teams CASCADE;
 DROP TABLE IF EXISTS competitions CASCADE;
-DROP FUNCTION IF EXISTS sync_points_on_activity_log CASCADE;
-DROP FUNCTION IF EXISTS sync_attendance_bonus CASCADE;
+DROP TABLE IF EXISTS members CASCADE;
+DROP TABLE IF EXISTS admin_invites CASCADE;
+DROP TABLE IF EXISTS gym_admins CASCADE;
+DROP TABLE IF EXISTS gyms CASCADE;
 
 -- ============================================================
--- COMPETITIONS  (only one active at a time)
+-- GYMS
+-- ============================================================
+CREATE TABLE gyms (
+  id         UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  name       TEXT NOT NULL,
+  gym_code   TEXT NOT NULL UNIQUE,            -- short join code, e.g. "OTF4K2"
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- ============================================================
+-- GYM ADMINS (links Supabase auth users to a gym)
+-- ============================================================
+CREATE TABLE gym_admins (
+  id         UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  gym_id     UUID NOT NULL REFERENCES gyms(id) ON DELETE CASCADE,
+  user_id    UUID NOT NULL,                   -- references auth.users(id)
+  email      TEXT,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  UNIQUE (user_id)                            -- one gym per admin account
+);
+
+-- ============================================================
+-- ADMIN INVITES (pending invitations by email)
+-- ============================================================
+CREATE TABLE admin_invites (
+  id         UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  gym_id     UUID NOT NULL REFERENCES gyms(id) ON DELETE CASCADE,
+  email      TEXT NOT NULL,
+  accepted   BOOLEAN NOT NULL DEFAULT FALSE,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  UNIQUE (gym_id, email)
+);
+
+-- ============================================================
+-- MEMBERS (password accounts, scoped to a gym)
+-- ============================================================
+CREATE TABLE members (
+  id            UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  gym_id        UUID NOT NULL REFERENCES gyms(id) ON DELETE CASCADE,
+  display_name  TEXT NOT NULL,
+  password_hash TEXT NOT NULL,
+  device_token  TEXT NOT NULL UNIQUE,         -- session token issued on login
+  created_at    TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  UNIQUE (gym_id, display_name)               -- name is the login key within a gym
+);
+
+-- ============================================================
+-- COMPETITIONS (scoped to a gym)
 -- ============================================================
 CREATE TABLE competitions (
   id         UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  gym_id     UUID NOT NULL REFERENCES gyms(id) ON DELETE CASCADE,
   name       TEXT NOT NULL,
   start_date DATE NOT NULL,
   end_date   DATE NOT NULL,
@@ -25,13 +76,8 @@ CREATE TABLE competitions (
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
--- Enforce at most one active competition
-CREATE UNIQUE INDEX one_active_competition
-  ON competitions (is_active)
-  WHERE is_active = TRUE;
-
 -- ============================================================
--- TEAMS  (belong to a competition)
+-- TEAMS
 -- ============================================================
 CREATE TABLE teams (
   id             UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -43,17 +89,7 @@ CREATE TABLE teams (
 );
 
 -- ============================================================
--- MEMBERS  (global identity — name + device token)
--- ============================================================
-CREATE TABLE members (
-  id           UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  display_name TEXT NOT NULL,
-  device_token TEXT NOT NULL UNIQUE,
-  created_at   TIMESTAMPTZ NOT NULL DEFAULT NOW()
-);
-
--- ============================================================
--- ENROLLMENTS  (a member's spot in a competition + team)
+-- ENROLLMENTS (a member's place in a competition)
 -- ============================================================
 CREATE TABLE enrollments (
   id             UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -66,10 +102,7 @@ CREATE TABLE enrollments (
 );
 
 -- ============================================================
--- GOALS  (flexible tasks/challenges within a competition)
---   - target_count: how many times to complete to earn points (1 = single)
---   - is_refreshable + refresh_interval: resets each day/week
---   - starts_at / ends_at: optional active window (defaults to competition span)
+-- GOALS
 -- ============================================================
 CREATE TABLE goals (
   id               UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -87,15 +120,13 @@ CREATE TABLE goals (
 );
 
 -- ============================================================
--- GOAL LOGS  (one row per enrollment per goal per period)
---   period_key: 'once' | a date (daily) | 'YYYY-Www' (weekly)
---   count: progress toward target within this period
+-- GOAL LOGS (per-period progress per enrollment)
 -- ============================================================
 CREATE TABLE goal_logs (
   id            UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   enrollment_id UUID NOT NULL REFERENCES enrollments(id) ON DELETE CASCADE,
   goal_id       UUID NOT NULL REFERENCES goals(id) ON DELETE CASCADE,
-  period_key    TEXT NOT NULL DEFAULT 'once',
+  period_key    TEXT NOT NULL,
   count         INTEGER NOT NULL DEFAULT 0,
   points_earned INTEGER NOT NULL DEFAULT 0,
   updated_at    TIMESTAMPTZ NOT NULL DEFAULT NOW(),
@@ -103,22 +134,51 @@ CREATE TABLE goal_logs (
 );
 
 -- ============================================================
--- ROW LEVEL SECURITY  (public read; writes go through service-role API)
+-- TRIGGER: keep enrollment + team point totals in sync
 -- ============================================================
+CREATE OR REPLACE FUNCTION sync_points_on_goal_log()
+RETURNS TRIGGER AS $$
+DECLARE
+  delta INTEGER;
+BEGIN
+  delta := NEW.points_earned - COALESCE(OLD.points_earned, 0);
+  IF delta = 0 THEN RETURN NEW; END IF;
+
+  UPDATE enrollments SET points = points + delta WHERE id = NEW.enrollment_id;
+  UPDATE teams SET total_points = total_points + delta
+    WHERE id = (SELECT team_id FROM enrollments WHERE id = NEW.enrollment_id);
+
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_sync_goal_points
+  AFTER INSERT OR UPDATE ON goal_logs
+  FOR EACH ROW EXECUTE FUNCTION sync_points_on_goal_log();
+
+-- ============================================================
+-- ROW LEVEL SECURITY (writes go through service-role API routes)
+-- ============================================================
+ALTER TABLE gyms ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "gyms_public_read" ON gyms FOR SELECT USING (true);
+
 ALTER TABLE competitions ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "competitions_public_read" ON competitions FOR SELECT USING (true);
 
 ALTER TABLE teams ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "teams_public_read" ON teams FOR SELECT USING (true);
 
-ALTER TABLE members ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "members_public_read" ON members FOR SELECT USING (true);
+ALTER TABLE goals ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "goals_public_read" ON goals FOR SELECT USING (true);
 
 ALTER TABLE enrollments ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "enrollments_public_read" ON enrollments FOR SELECT USING (true);
 
-ALTER TABLE goals ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "goals_public_read" ON goals FOR SELECT USING (true);
-
 ALTER TABLE goal_logs ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "goal_logs_public_read" ON goal_logs FOR SELECT USING (true);
+
+-- members, gym_admins, admin_invites: no public policies — only the
+-- service-role API can read/write them (password hashes stay private).
+ALTER TABLE members ENABLE ROW LEVEL SECURITY;
+ALTER TABLE gym_admins ENABLE ROW LEVEL SECURITY;
+ALTER TABLE admin_invites ENABLE ROW LEVEL SECURITY;

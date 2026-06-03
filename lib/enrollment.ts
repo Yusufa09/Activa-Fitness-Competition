@@ -1,19 +1,20 @@
 import { createAdminClient } from "@/lib/supabase/admin";
-import type { Competition, Enrollment, Member, Team, MemberState } from "@/types";
+import type { Competition, Enrollment, Member, Team, MemberState, Gym } from "@/types";
 
 type Supa = ReturnType<typeof createAdminClient>;
 
-export async function getActiveCompetition(supabase: Supa): Promise<Competition | null> {
+export async function getActiveCompetition(supabase: Supa, gymId: string): Promise<Competition | null> {
   const { data } = await supabase
     .from("competitions")
     .select("*")
+    .eq("gym_id", gymId)
     .eq("is_active", true)
     .single();
   return data ?? null;
 }
 
 /**
- * Ensure the member is enrolled in the active competition.
+ * Ensure the member is enrolled in their gym's active competition.
  * Assigns them to the team with the fewest members (random tie-break)
  * so teams stay balanced — including members who join mid-competition.
  */
@@ -22,7 +23,6 @@ export async function ensureEnrollment(
   memberId: string,
   competition: Competition
 ): Promise<(Enrollment & { team: Team }) | null> {
-  // Already enrolled?
   const { data: existing } = await supabase
     .from("enrollments")
     .select("*, team:teams(*)")
@@ -32,7 +32,6 @@ export async function ensureEnrollment(
 
   if (existing) return existing as Enrollment & { team: Team };
 
-  // Load teams + their current enrollment counts
   const { data: teams } = await supabase
     .from("teams")
     .select("*, enrollments(count)")
@@ -45,7 +44,6 @@ export async function ensureEnrollment(
     count: (t.enrollments as unknown as [{ count: number }])[0]?.count ?? 0,
   }));
 
-  // Smallest teams, random pick among ties
   const min = Math.min(...withCounts.map((w) => w.count));
   const smallest = withCounts.filter((w) => w.count === min);
   const chosen = smallest[Math.floor(Math.random() * smallest.length)].team;
@@ -60,10 +58,12 @@ export async function ensureEnrollment(
 }
 
 export async function buildMemberState(supabase: Supa, member: Member): Promise<MemberState> {
-  const competition = await getActiveCompetition(supabase);
+  const { data: gym } = await supabase.from("gyms").select("*").eq("id", member.gym_id).single();
+
+  const competition = await getActiveCompetition(supabase, member.gym_id);
   if (!competition) {
-    return { member, competition: null, enrollment: null };
+    return { member, gym: gym as Gym, competition: null, enrollment: null };
   }
   const enrollment = await ensureEnrollment(supabase, member.id, competition);
-  return { member, competition, enrollment };
+  return { member, gym: gym as Gym, competition, enrollment };
 }

@@ -2,35 +2,26 @@
 
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
-import type { LeaderboardTeam, Competition } from "@/types";
+import type { LeaderboardTeam } from "@/types";
 
-export function useLeaderboard() {
+export function useLeaderboard(competitionId: string | null) {
   const [teams, setTeams] = useState<LeaderboardTeam[]>([]);
-  const [competition, setCompetition] = useState<Competition | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (!competitionId) {
+      setTeams([]);
+      setLoading(false);
+      return;
+    }
+
     const supabase = createClient();
 
     async function fetchTeams() {
-      const { data: comp } = await supabase
-        .from("competitions")
-        .select("*")
-        .eq("is_active", true)
-        .single();
-
-      setCompetition(comp ?? null);
-
-      if (!comp) {
-        setTeams([]);
-        setLoading(false);
-        return;
-      }
-
       const { data } = await supabase
         .from("teams")
         .select("*, enrollments(count)")
-        .eq("competition_id", comp.id)
+        .eq("competition_id", competitionId)
         .order("total_points", { ascending: false });
 
       if (data) {
@@ -48,10 +39,10 @@ export function useLeaderboard() {
     fetchTeams();
 
     const channel = supabase
-      .channel("leaderboard-teams")
+      .channel(`leaderboard-${competitionId}`)
       .on(
         "postgres_changes",
-        { event: "UPDATE", schema: "public", table: "teams" },
+        { event: "UPDATE", schema: "public", table: "teams", filter: `competition_id=eq.${competitionId}` },
         (payload) => {
           setTeams((prev) => {
             const updated = prev.map((t) =>
@@ -67,7 +58,7 @@ export function useLeaderboard() {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, []);
+  }, [competitionId]);
 
-  return { teams, competition, loading };
+  return { teams, loading };
 }

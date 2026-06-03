@@ -2,8 +2,32 @@ export type TeamColor = "orange" | "rose" | "blue" | "emerald" | "violet" | "amb
 
 export type RefreshInterval = "daily" | "weekly";
 
+export interface Gym {
+  id: string;
+  name: string;
+  gym_code: string;
+  created_at: string;
+}
+
+export interface GymAdmin {
+  id: string;
+  gym_id: string;
+  user_id: string;
+  email: string | null;
+  created_at: string;
+}
+
+export interface AdminInvite {
+  id: string;
+  gym_id: string;
+  email: string;
+  accepted: boolean;
+  created_at: string;
+}
+
 export interface Competition {
   id: string;
+  gym_id: string;
   name: string;
   start_date: string;
   end_date: string;
@@ -22,6 +46,7 @@ export interface Team {
 
 export interface Member {
   id: string;
+  gym_id: string;
   display_name: string;
   device_token: string;
   created_at: string;
@@ -72,11 +97,14 @@ export interface MemberSession {
   device_token: string;
   member_id: string;
   display_name: string;
+  gym_id: string;
+  gym_name: string;
 }
 
 // Resolved state returned by register/session APIs
 export interface MemberState {
   member: Member;
+  gym: Gym;
   competition: Competition | null;
   enrollment: (Enrollment & { team: Team }) | null;
 }

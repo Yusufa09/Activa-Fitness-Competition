@@ -84,9 +84,19 @@ export default function AdminLoginPage() {
           </Button>
         </form>
 
-        <p className="text-center mt-4 text-slate-400 text-xs">
-          <a href="/" className="hover:text-slate-600">← Back to member app</a>
-        </p>
+        <div className="mt-5 text-center space-y-2">
+          <p className="text-sm text-slate-500">
+            New gym?{" "}
+            <a href="/admin/signup" className="text-orange-600 hover:underline font-medium">Create a gym →</a>
+          </p>
+          <p className="text-sm text-slate-500">
+            Invited to manage a gym?{" "}
+            <a href="/admin/accept-invite" className="text-orange-600 hover:underline font-medium">Accept invite →</a>
+          </p>
+          <p className="text-slate-400 text-xs pt-2">
+            <a href="/" className="hover:text-slate-600">← Back to member app</a>
+          </p>
+        </div>
       </div>
     </main>
   );
