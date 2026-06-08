@@ -102,26 +102,14 @@ export async function POST(req: NextRequest) {
     });
   }
 
-  // Award points to enrollment + team (team update drives the real-time leaderboard)
-  if (pointsToAward > 0) {
-    await supabase
-      .from("enrollments")
-      .update({ points: enrollment.points + pointsToAward })
-      .eq("id", enrollment.id);
-
-    const { data: team } = await supabase
-      .from("teams")
-      .select("total_points")
-      .eq("id", enrollment.team_id)
-      .single();
-
-    if (team) {
-      await supabase
-        .from("teams")
-        .update({ total_points: team.total_points + pointsToAward })
-        .eq("id", enrollment.team_id);
-    }
-  }
+  // Points are synced by the DB trigger (sync_points_on_goal_log) when the
+  // goal_logs row is written — do NOT update enrollments/teams here too, or
+  // points would be double-counted. Re-read the fresh enrollment total instead.
+  const { data: fresh } = await supabase
+    .from("enrollments")
+    .select("points")
+    .eq("id", enrollment.id)
+    .single();
 
   return NextResponse.json({
     success: true,
@@ -129,6 +117,6 @@ export async function POST(req: NextRequest) {
     target: goal.target_count,
     completed: justCompleted,
     points_earned: pointsToAward,
-    new_total: enrollment.points + pointsToAward,
+    new_total: fresh?.points ?? enrollment.points,
   });
 }

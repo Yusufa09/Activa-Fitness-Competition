@@ -7,10 +7,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dumbbell, Copy, Check } from "lucide-react";
+import { isValidEmail } from "@/lib/validation";
 
 export default function GymSignupPage() {
   const router = useRouter();
   const [gymName, setGymName] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -21,12 +24,19 @@ export default function GymSignupPage() {
   async function handleSignup(e: React.FormEvent) {
     e.preventDefault();
     setError("");
+    if (!isValidEmail(email)) { setError("Please enter a valid email address."); return; }
     setLoading(true);
 
     const res = await fetch("/api/gym/signup", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ gym_name: gymName.trim(), email: email.trim(), password }),
+      body: JSON.stringify({
+        gym_name: gymName.trim(),
+        first_name: firstName.trim(),
+        last_name: lastName.trim(),
+        email: email.trim(),
+        password,
+      }),
     });
     const data = await res.json();
 
@@ -96,6 +106,18 @@ export default function GymSignupPage() {
             <Label className="text-slate-700 text-sm">Gym Name</Label>
             <Input value={gymName} onChange={(e) => setGymName(e.target.value)} placeholder="e.g. Orange Theory Downtown" disabled={loading}
               className="border-slate-300 focus:border-orange-500 focus:ring-orange-500" />
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-1.5">
+              <Label className="text-slate-700 text-sm">First Name</Label>
+              <Input value={firstName} onChange={(e) => setFirstName(e.target.value)} placeholder="Jordan" disabled={loading}
+                className="border-slate-300 focus:border-orange-500 focus:ring-orange-500" />
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-slate-700 text-sm">Last Name</Label>
+              <Input value={lastName} onChange={(e) => setLastName(e.target.value)} placeholder="Smith" disabled={loading}
+                className="border-slate-300 focus:border-orange-500 focus:ring-orange-500" />
+            </div>
           </div>
           <div className="space-y-1.5">
             <Label className="text-slate-700 text-sm">Your Email</Label>

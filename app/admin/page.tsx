@@ -39,8 +39,8 @@ export default function AdminLoginPage() {
           <div className="inline-flex items-center justify-center w-14 h-14 bg-orange-600 rounded-xl mb-4">
             <Dumbbell className="w-7 h-7 text-white" />
           </div>
-          <h1 className="text-2xl font-bold text-slate-800">Admin Login</h1>
-          <p className="text-slate-500 text-sm mt-1">Gym manager access only</p>
+          <h1 className="text-2xl font-bold text-slate-800">Gym Administrator Login</h1>
+          <p className="text-slate-500 text-sm mt-1">Activa · administrators only</p>
         </div>
 
         <form onSubmit={handleLogin} className="bg-white border border-slate-200 shadow-sm rounded-2xl p-6 space-y-4">

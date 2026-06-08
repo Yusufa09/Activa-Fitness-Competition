@@ -34,6 +34,8 @@ CREATE TABLE gym_admins (
   gym_id     UUID NOT NULL REFERENCES gyms(id) ON DELETE CASCADE,
   user_id    UUID NOT NULL,                   -- references auth.users(id)
   email      TEXT,
+  first_name TEXT,
+  last_name  TEXT,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   UNIQUE (user_id)                            -- one gym per admin account
 );

@@ -7,9 +7,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dumbbell } from "lucide-react";
+import { isValidEmail } from "@/lib/validation";
 
 export default function AcceptInvitePage() {
   const router = useRouter();
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -18,12 +21,18 @@ export default function AcceptInvitePage() {
   async function handleAccept(e: React.FormEvent) {
     e.preventDefault();
     setError("");
+    if (!isValidEmail(email)) { setError("Please enter a valid email address."); return; }
     setLoading(true);
 
     const res = await fetch("/api/gym/accept-invite", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email: email.trim(), password }),
+      body: JSON.stringify({
+        first_name: firstName.trim(),
+        last_name: lastName.trim(),
+        email: email.trim(),
+        password,
+      }),
     });
     const data = await res.json();
 
@@ -51,6 +60,18 @@ export default function AcceptInvitePage() {
         </div>
 
         <form onSubmit={handleAccept} className="bg-white border border-slate-200 shadow-sm rounded-2xl p-6 space-y-4">
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-1.5">
+              <Label className="text-slate-700 text-sm">First Name</Label>
+              <Input value={firstName} onChange={(e) => setFirstName(e.target.value)} placeholder="Jordan" disabled={loading}
+                className="border-slate-300 focus:border-orange-500 focus:ring-orange-500" />
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-slate-700 text-sm">Last Name</Label>
+              <Input value={lastName} onChange={(e) => setLastName(e.target.value)} placeholder="Smith" disabled={loading}
+                className="border-slate-300 focus:border-orange-500 focus:ring-orange-500" />
+            </div>
+          </div>
           <div className="space-y-1.5">
             <Label className="text-slate-700 text-sm">Email (the one you were invited with)</Label>
             <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" disabled={loading}

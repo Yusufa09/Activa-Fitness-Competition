@@ -5,8 +5,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Mail, Trash2, Shield, Clock } from "lucide-react";
 import { toast } from "sonner";
+import { isValidEmail } from "@/lib/validation";
 
-interface AdminRow { id: string; email: string | null; created_at: string }
+interface AdminRow { id: string; email: string | null; first_name: string | null; last_name: string | null; created_at: string }
 interface InviteRow { id: string; email: string; created_at: string }
 
 export default function AdminsPage() {
@@ -28,6 +29,7 @@ export default function AdminsPage() {
   async function invite(e: React.FormEvent) {
     e.preventDefault();
     if (!email.trim()) return;
+    if (!isValidEmail(email)) { toast.error("Please enter a valid email address."); return; }
     setInviting(true);
     const res = await fetch("/api/admin/admins", {
       method: "POST",
@@ -55,8 +57,8 @@ export default function AdminsPage() {
   return (
     <div>
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-slate-800">Admins</h1>
-        <p className="text-slate-500 text-sm mt-0.5">Invite other managers to help run this gym.</p>
+        <h1 className="text-2xl font-bold text-slate-800">Administrators</h1>
+        <p className="text-slate-500 text-sm mt-0.5">Invite other gym administrators to help run this gym.</p>
       </div>
 
       {/* Invite form */}
@@ -81,14 +83,20 @@ export default function AdminsPage() {
       ) : (
         <div className="space-y-6">
           <div>
-            <h2 className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">Current Admins ({admins.length})</h2>
+            <h2 className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">Current Administrators ({admins.length})</h2>
             <div className="bg-white border border-slate-200 rounded-xl divide-y divide-slate-100">
-              {admins.map((a) => (
-                <div key={a.id} className="flex items-center gap-3 px-4 py-3">
-                  <Shield className="w-4 h-4 text-orange-500" />
-                  <span className="text-sm text-slate-700">{a.email ?? "—"}</span>
-                </div>
-              ))}
+              {admins.map((a) => {
+                const fullName = [a.first_name, a.last_name].filter(Boolean).join(" ");
+                return (
+                  <div key={a.id} className="flex items-center gap-3 px-4 py-3">
+                    <Shield className="w-4 h-4 text-orange-500 flex-shrink-0" />
+                    <div className="min-w-0">
+                      {fullName && <span className="text-sm text-slate-700 font-medium">{fullName}</span>}
+                      <span className={`text-sm text-slate-500 ${fullName ? "block text-xs" : ""}`}>{a.email ?? "—"}</span>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           </div>
 

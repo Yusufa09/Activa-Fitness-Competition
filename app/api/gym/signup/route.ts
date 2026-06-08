@@ -3,13 +3,17 @@ export const dynamic = "force-dynamic";
 import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { generateUniqueGymCode } from "@/lib/gym";
+import { isValidEmail } from "@/lib/validation";
 
-// Create a brand-new gym + its first admin account.
+// Create a brand-new gym + its first administrator account.
 export async function POST(req: NextRequest) {
-  const { gym_name, email, password } = await req.json();
+  const { gym_name, email, password, first_name, last_name } = await req.json();
 
-  if (!gym_name?.trim() || !email?.trim() || !password) {
-    return NextResponse.json({ error: "Gym name, email, and password are required." }, { status: 400 });
+  if (!gym_name?.trim() || !email?.trim() || !password || !first_name?.trim() || !last_name?.trim()) {
+    return NextResponse.json({ error: "Gym name, your name, email, and password are all required." }, { status: 400 });
+  }
+  if (!isValidEmail(email)) {
+    return NextResponse.json({ error: "Please enter a valid email address." }, { status: 400 });
   }
   if (password.length < 6) {
     return NextResponse.json({ error: "Password must be at least 6 characters." }, { status: 400 });
@@ -50,6 +54,8 @@ export async function POST(req: NextRequest) {
     gym_id: gym.id,
     user_id: created.user.id,
     email: email.trim(),
+    first_name: first_name.trim(),
+    last_name: last_name.trim(),
   });
 
   return NextResponse.json({ gym: { id: gym.id, name: gym.name, gym_code: gym.gym_code } });

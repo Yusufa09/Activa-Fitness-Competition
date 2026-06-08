@@ -32,14 +32,17 @@ export default function CompetitionsPage() {
   }
   useEffect(() => { fetchData(); }, []);
 
+  const hasActive = competitions.some((c) => c.is_active);
+
   async function patch(id: string, action: string) {
     const res = await fetch("/api/admin/competitions", {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ id, action }),
     });
+    const data = await res.json().catch(() => ({}));
     if (res.ok) { toast.success(action === "activate" ? "Competition started!" : "Competition ended."); fetchData(); }
-    else toast.error("Action failed.");
+    else toast.error(data.error ?? "Action failed.");
   }
 
   async function remove(id: string) {
@@ -60,9 +63,19 @@ export default function CompetitionsPage() {
           <h1 className="text-2xl font-bold text-slate-800">Competitions</h1>
           <p className="text-slate-500 text-sm mt-0.5">One competition runs at a time.</p>
         </div>
-        <Button size="sm" onClick={() => { setEditing(null); setFormOpen(true); }} className="bg-orange-600 hover:bg-orange-700 text-white">
-          <Plus className="w-4 h-4 mr-1.5" /> New Competition
-        </Button>
+        <div className="text-right">
+          <Button
+            size="sm"
+            onClick={() => { setEditing(null); setFormOpen(true); }}
+            disabled={hasActive}
+            className="bg-orange-600 hover:bg-orange-700 text-white disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <Plus className="w-4 h-4 mr-1.5" /> New Competition
+          </Button>
+          {hasActive && (
+            <p className="text-xs text-slate-400 mt-1.5 max-w-[200px]">End the active competition to start a new one.</p>
+          )}
+        </div>
       </div>
 
       {loading ? (

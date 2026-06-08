@@ -2,13 +2,17 @@ export const dynamic = "force-dynamic";
 
 import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { isValidEmail } from "@/lib/validation";
 
-// An invited email creates their admin account and joins the gym they were invited to.
+// An invited email creates their administrator account and joins the gym they were invited to.
 export async function POST(req: NextRequest) {
-  const { email, password } = await req.json();
+  const { email, password, first_name, last_name } = await req.json();
 
-  if (!email?.trim() || !password) {
-    return NextResponse.json({ error: "Email and password are required." }, { status: 400 });
+  if (!email?.trim() || !password || !first_name?.trim() || !last_name?.trim()) {
+    return NextResponse.json({ error: "Your name, email, and password are all required." }, { status: 400 });
+  }
+  if (!isValidEmail(email)) {
+    return NextResponse.json({ error: "Please enter a valid email address." }, { status: 400 });
   }
   if (password.length < 6) {
     return NextResponse.json({ error: "Password must be at least 6 characters." }, { status: 400 });
@@ -53,6 +57,8 @@ export async function POST(req: NextRequest) {
     gym_id: invite.gym_id,
     user_id: created.user.id,
     email: cleanEmail,
+    first_name: first_name.trim(),
+    last_name: last_name.trim(),
   });
   await supabase.from("admin_invites").update({ accepted: true }).eq("id", invite.id);
 

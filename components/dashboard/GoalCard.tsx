@@ -1,11 +1,25 @@
 "use client";
 
 import { useState } from "react";
+import confetti from "canvas-confetti";
 import { Button } from "@/components/ui/button";
 import { CheckCircle2, Zap, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 import { refreshLabel } from "@/lib/points";
 import type { GoalWithProgress } from "@/types";
+
+const ORANGE_CONFETTI = ["#ea580c", "#f97316", "#fb923c", "#fdba74", "#f59e0b"];
+
+// Small burst for a logged rep, big celebration for a completed goal
+function celebrate(big: boolean) {
+  if (big) {
+    confetti({ particleCount: 120, spread: 80, origin: { y: 0.7 }, colors: ORANGE_CONFETTI, scalar: 1.1 });
+    setTimeout(() => confetti({ particleCount: 60, angle: 60, spread: 70, origin: { x: 0, y: 0.7 }, colors: ORANGE_CONFETTI }), 120);
+    setTimeout(() => confetti({ particleCount: 60, angle: 120, spread: 70, origin: { x: 1, y: 0.7 }, colors: ORANGE_CONFETTI }), 120);
+  } else {
+    confetti({ particleCount: 35, spread: 55, origin: { y: 0.7 }, colors: ORANGE_CONFETTI, scalar: 0.8 });
+  }
+}
 
 interface Props {
   goal: GoalWithProgress;
@@ -32,6 +46,7 @@ export function GoalCard({ goal, deviceToken, onLogged }: Props) {
       toast.error(data.error ?? "Could not log this.");
       return;
     }
+    celebrate(!!data.completed); // bigger burst when the goal is fully completed
     onLogged(data.new_total ?? 0);
   }
 
@@ -78,7 +93,7 @@ export function GoalCard({ goal, deviceToken, onLogged }: Props) {
           {goal.completed ? (
             <div className="flex items-center gap-1 text-orange-600 text-sm font-medium">
               <CheckCircle2 className="w-4 h-4" />
-              <span>{multi ? "Complete!" : "Done!"}</span>
+              <span>Completed</span>
             </div>
           ) : (
             <Button
@@ -87,7 +102,7 @@ export function GoalCard({ goal, deviceToken, onLogged }: Props) {
               disabled={busy}
               className="bg-orange-600 hover:bg-orange-700 text-white text-xs px-3 py-1.5"
             >
-              {busy ? "..." : multi ? "Log One" : "Claim"}
+              {busy ? "..." : multi ? "Log One" : "Complete"}
             </Button>
           )}
         </div>

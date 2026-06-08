@@ -14,6 +14,8 @@ export interface GymAdmin {
   gym_id: string;
   user_id: string;
   email: string | null;
+  first_name: string | null;
+  last_name: string | null;
   created_at: string;
 }
 

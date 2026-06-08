@@ -49,7 +49,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     { href: "/admin/competitions", label: "Competitions", icon: CalendarRange },
     { href: "/admin/goals", label: "Goals", icon: Trophy },
     { href: "/admin/teams", label: "Teams", icon: Users },
-    { href: "/admin/admins", label: "Admins", icon: UserCog },
+    { href: "/admin/admins", label: "Administrators", icon: UserCog },
   ];
 
   return (
@@ -57,7 +57,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       <aside className="w-56 bg-slate-900 flex flex-col py-6 px-4 fixed h-full">
         <div className="flex items-center gap-2 mb-1 px-2">
           <Dumbbell className="w-6 h-6 text-orange-400 flex-shrink-0" />
-          <span className="text-white font-bold text-sm truncate">{gym?.name ?? "Gym Admin"}</span>
+          <span className="text-white font-bold text-sm truncate">{gym?.name ?? "Gym Administrator"}</span>
         </div>
         {gym ? (
           <div className="px-2 mb-7">

@@ -36,8 +36,19 @@ export async function POST(req: NextRequest) {
 
   const supabase = createAdminClient();
 
-  // Only one active at a time per gym — deactivate this gym's current active competition
-  await supabase.from("competitions").update({ is_active: false }).eq("gym_id", ctx.gymId).eq("is_active", true);
+  // Only one active competition per gym — block if one is already running
+  const { data: active } = await supabase
+    .from("competitions")
+    .select("id")
+    .eq("gym_id", ctx.gymId)
+    .eq("is_active", true)
+    .maybeSingle();
+  if (active) {
+    return NextResponse.json(
+      { error: "End your current competition before starting a new one." },
+      { status: 409 }
+    );
+  }
 
   const { data: competition, error } = await supabase
     .from("competitions")
@@ -69,9 +80,21 @@ export async function PATCH(req: NextRequest) {
 
   const supabase = createAdminClient();
 
-  // Activating: deactivate this gym's others first (one active per gym)
+  // Activating: only allowed if no other competition is currently active
   if (action === "activate") {
-    await supabase.from("competitions").update({ is_active: false }).eq("gym_id", ctx.gymId).eq("is_active", true);
+    const { data: active } = await supabase
+      .from("competitions")
+      .select("id")
+      .eq("gym_id", ctx.gymId)
+      .eq("is_active", true)
+      .neq("id", id)
+      .maybeSingle();
+    if (active) {
+      return NextResponse.json(
+        { error: "End your current competition before starting another one." },
+        { status: 409 }
+      );
+    }
     const { data, error } = await supabase
       .from("competitions")
       .update({ is_active: true })
