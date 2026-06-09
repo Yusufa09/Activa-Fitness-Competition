@@ -45,6 +45,11 @@ export function useMemberSession(): SessionResult {
           gym_name: data.gym.name,
           body_scan_enabled: !!data.competition?.body_scan_enabled,
         });
+        // Tell the nav (and anything else) the session was refreshed, so the
+        // Body Scan link appears immediately on the same load.
+        if (typeof window !== "undefined") {
+          window.dispatchEvent(new Event("member-session-updated"));
+        }
         setState(data);
         setLoading(false);
       })
