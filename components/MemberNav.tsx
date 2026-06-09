@@ -15,9 +15,19 @@ export function MemberNav() {
   const [signingOut, setSigningOut] = useState(false);
 
   useEffect(() => {
-    const s = loadSession();
-    setGymName(s?.gym_name ?? "");
-    setBodyScan(!!s?.body_scan_enabled);
+    function sync() {
+      const s = loadSession();
+      setGymName(s?.gym_name ?? "");
+      setBodyScan(!!s?.body_scan_enabled);
+    }
+    sync();
+    // Re-read when the session is refreshed (e.g. body scan just enabled) or changed in another tab
+    window.addEventListener("member-session-updated", sync);
+    window.addEventListener("storage", sync);
+    return () => {
+      window.removeEventListener("member-session-updated", sync);
+      window.removeEventListener("storage", sync);
+    };
   }, []);
 
   async function doSignOut() {
