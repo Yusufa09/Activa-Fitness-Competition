@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { TEAM_COLORS } from "@/lib/points";
-import { Trophy, Crown } from "lucide-react";
 import { toast } from "sonner";
 
 type Metric = "body_fat" | "muscle_mass" | "weight";
@@ -15,31 +15,36 @@ const METRIC_META: Record<Metric, { label: string; unit: string }> = {
 
 interface ScanVals { body_fat: number | null; muscle_mass: number | null; weight: number | null }
 interface MemberRow { enrollment_id: string; display_name: string; first: ScanVals | null; latest: ScanVals | null; scan_count: number }
-interface TeamRow { id: string; name: string; color: string; is_winner: boolean; members: MemberRow[] }
-interface Comp { id: string; name: string; body_scan_enabled: boolean; body_scan_metrics: Metric[]; body_scan_winner_points: number; body_scan_winner_team_id: string | null }
+interface TeamRow { id: string; name: string; color: string; bonus_points: number; members: MemberRow[] }
+interface Comp { id: string; name: string; body_scan_enabled: boolean; body_scan_metrics: Metric[] }
 
 export default function AdminBodyScansPage() {
   const [comp, setComp] = useState<Comp | null>(null);
   const [teams, setTeams] = useState<TeamRow[]>([]);
   const [loading, setLoading] = useState(true);
+  const [bonusInputs, setBonusInputs] = useState<Record<string, string>>({});
+  const [savingTeam, setSavingTeam] = useState<string | null>(null);
 
   async function load() {
     const res = await fetch("/api/admin/body-scans");
     const data = await res.json();
     setComp(data.competition ?? null);
     setTeams(data.teams ?? []);
+    setBonusInputs(Object.fromEntries((data.teams ?? []).map((t: TeamRow) => [t.id, String(t.bonus_points ?? 0)])));
     setLoading(false);
   }
   useEffect(() => { load(); }, []);
 
-  async function declareWinner(team_id: string) {
+  async function saveBonus(team_id: string) {
+    setSavingTeam(team_id);
     const res = await fetch("/api/admin/body-scans", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ action: "declare_winner", team_id }),
+      body: JSON.stringify({ action: "set_bonus", team_id, points: Number(bonusInputs[team_id] ?? 0) }),
     });
-    if (res.ok) { toast.success("Winning team declared! Bonus points awarded."); load(); }
-    else toast.error("Could not declare winner.");
+    setSavingTeam(null);
+    if (res.ok) { toast.success("Bonus points saved."); load(); }
+    else toast.error("Could not save bonus.");
   }
 
   if (loading) {
@@ -69,33 +74,36 @@ export default function AdminBodyScansPage() {
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-slate-800">Body Scan</h1>
         <p className="text-slate-500 text-sm mt-0.5">
-          {comp.name} · winner bonus: {comp.body_scan_winner_points} pts. Declare the winning team when the competition ends.
+          {comp.name} · Review each team&apos;s totals below and assign bonus points to each team. Bonus points count toward the standings.
         </p>
       </div>
 
       <div className="space-y-4">
         {teams.map((team) => {
           const colors = TEAM_COLORS[team.color] ?? TEAM_COLORS.orange;
+          const dirty = String(team.bonus_points) !== (bonusInputs[team.id] ?? "");
           return (
             <div key={team.id} className="bg-white rounded-xl border border-slate-200 overflow-hidden">
-              <div className={`px-5 py-3 flex items-center justify-between ${colors.bg}`}>
+              <div className={`px-5 py-3 flex items-center justify-between gap-3 ${colors.bg}`}>
+                <h2 className={`font-bold ${colors.text}`}>{team.name}</h2>
                 <div className="flex items-center gap-2">
-                  <h2 className={`font-bold ${colors.text}`}>{team.name}</h2>
-                  {team.is_winner && (
-                    <span className="inline-flex items-center gap-1 text-xs font-semibold text-amber-700 bg-amber-100 border border-amber-200 px-2 py-0.5 rounded-full">
-                      <Crown className="w-3 h-3" /> Winner
-                    </span>
-                  )}
+                  <label className="text-xs font-medium text-slate-600 hidden sm:inline">Bonus points</label>
+                  <Input
+                    type="number"
+                    min={0}
+                    value={bonusInputs[team.id] ?? "0"}
+                    onChange={(e) => setBonusInputs((p) => ({ ...p, [team.id]: e.target.value }))}
+                    className="w-24 h-8 bg-white text-sm"
+                  />
+                  <Button
+                    size="sm"
+                    onClick={() => saveBonus(team.id)}
+                    disabled={savingTeam === team.id || !dirty}
+                    className="bg-orange-600 hover:bg-orange-700 text-white text-xs disabled:opacity-50"
+                  >
+                    {savingTeam === team.id ? "..." : "Save"}
+                  </Button>
                 </div>
-                <Button
-                  size="sm"
-                  variant={team.is_winner ? "outline" : "default"}
-                  onClick={() => declareWinner(team.id)}
-                  className={team.is_winner ? "text-slate-500 text-xs" : "bg-orange-600 hover:bg-orange-700 text-white text-xs"}
-                >
-                  <Trophy className="w-3.5 h-3.5 mr-1.5" />
-                  {team.is_winner ? "Winner ✓" : "Declare winner"}
-                </Button>
               </div>
 
               {team.members.length === 0 ? (
@@ -141,6 +149,27 @@ export default function AdminBodyScansPage() {
                       </tr>
                     ))}
                   </tbody>
+                  <tfoot>
+                    <tr className="border-t-2 border-slate-200 bg-slate-50">
+                      <td className="px-4 py-2.5 text-xs font-semibold uppercase text-slate-600">Team total change</td>
+                      {metrics.map((m) => {
+                        const deltas = team.members
+                          .map((mem) => delta(m, mem.first, mem.latest))
+                          .filter((d): d is number => d != null);
+                        if (deltas.length === 0) {
+                          return <td key={m} className="px-4 py-2.5 text-right text-slate-300 text-xs">—</td>;
+                        }
+                        const total = deltas.reduce((s, d) => s + d, 0);
+                        return (
+                          <td key={m} className="px-4 py-2.5 text-right text-xs">
+                            <span className={`font-bold ${total === 0 ? "text-slate-500" : total > 0 ? "text-green-600" : "text-red-500"}`}>
+                              {total > 0 ? "+" : ""}{total.toFixed(1)}{METRIC_META[m].unit}
+                            </span>
+                          </td>
+                        );
+                      })}
+                    </tr>
+                  </tfoot>
                 </table>
               )}
             </div>

@@ -19,7 +19,7 @@ export async function GET() {
   // Teams + their enrollments + member name
   const { data: teams } = await supabase
     .from("teams")
-    .select("id, name, color, enrollments(id, member:members(display_name))")
+    .select("id, name, color, bonus_points, enrollments(id, member:members(display_name))")
     .eq("competition_id", competition.id)
     .order("name");
 
@@ -44,7 +44,7 @@ export async function GET() {
     id: t.id,
     name: t.name,
     color: t.color,
-    is_winner: competition.body_scan_winner_team_id === t.id,
+    bonus_points: t.bonus_points ?? 0,
     members: (t.enrollments as unknown as { id: string; member: { display_name: string } }[]).map((e) => {
       const list = scansByEnrollment[e.id] ?? [];
       const first = list[0] ?? null;
@@ -59,20 +59,18 @@ export async function GET() {
       name: competition.name,
       body_scan_enabled: competition.body_scan_enabled,
       body_scan_metrics: competition.body_scan_metrics,
-      body_scan_winner_points: competition.body_scan_winner_points,
-      body_scan_winner_team_id: competition.body_scan_winner_team_id,
     },
     teams: shaped,
   });
 }
 
-// POST { action: 'declare_winner', team_id } — move the winner bonus to that team
+// POST { action: 'set_bonus', team_id, points } — set a team's body-scan bonus points
 export async function POST(req: NextRequest) {
   const ctx = await getAdminContext();
   if (!ctx) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const { action, team_id } = await req.json();
-  if (action !== "declare_winner" || !team_id) {
+  const { action, team_id, points } = await req.json();
+  if (action !== "set_bonus" || !team_id) {
     return NextResponse.json({ error: "Invalid request." }, { status: 400 });
   }
 
@@ -80,33 +78,15 @@ export async function POST(req: NextRequest) {
   const competition = await getActiveCompetition(supabase, ctx.gymId);
   if (!competition) return NextResponse.json({ error: "No active competition." }, { status: 409 });
 
-  // The new team must belong to this competition
   if (!(await teamInCompetition(supabase, team_id, competition.id))) {
     return NextResponse.json({ error: "Team not found." }, { status: 404 });
   }
 
-  const bonus = competition.body_scan_winner_points ?? 0;
-  const prevWinner: string | null = competition.body_scan_winner_team_id;
-  if (prevWinner === team_id) return NextResponse.json({ success: true }); // no change
+  const value = Math.max(0, Math.round(Number(points) || 0));
+  const { error } = await supabase.from("teams").update({ bonus_points: value }).eq("id", team_id);
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
-  // Remove bonus from previous winner
-  if (prevWinner && bonus > 0) {
-    const { data: prev } = await supabase.from("teams").select("bonus_points").eq("id", prevWinner).single();
-    if (prev) {
-      await supabase.from("teams").update({ bonus_points: Math.max(0, prev.bonus_points - bonus) }).eq("id", prevWinner);
-    }
-  }
-  // Add bonus to new winner
-  if (bonus > 0) {
-    const { data: nw } = await supabase.from("teams").select("bonus_points").eq("id", team_id).single();
-    if (nw) {
-      await supabase.from("teams").update({ bonus_points: nw.bonus_points + bonus }).eq("id", team_id);
-    }
-  }
-  // Record the winner
-  await supabase.from("competitions").update({ body_scan_winner_team_id: team_id }).eq("id", competition.id);
-
-  return NextResponse.json({ success: true });
+  return NextResponse.json({ success: true, bonus_points: value });
 }
 
 async function teamInCompetition(supabase: Supa, teamId: string, competitionId: string) {

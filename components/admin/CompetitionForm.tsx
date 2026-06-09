@@ -46,7 +46,6 @@ export function CompetitionForm({ open, competition, onClose, onSaved }: Props) 
   const [bodyScanEnabled, setBodyScanEnabled] = useState(false);
   const [metrics, setMetrics] = useState<BodyScanMetric[]>([]);
   const [goalPoints, setGoalPoints] = useState(50);
-  const [winnerPoints, setWinnerPoints] = useState(100);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
 
@@ -58,7 +57,6 @@ export function CompetitionForm({ open, competition, onClose, onSaved }: Props) 
       setBodyScanEnabled(!!competition.body_scan_enabled);
       setMetrics(competition.body_scan_metrics ?? []);
       setGoalPoints(competition.body_scan_goal_points ?? 50);
-      setWinnerPoints(competition.body_scan_winner_points ?? 100);
     } else {
       setName("");
       setStartDate(today);
@@ -67,7 +65,6 @@ export function CompetitionForm({ open, competition, onClose, onSaved }: Props) 
       setBodyScanEnabled(false);
       setMetrics([]);
       setGoalPoints(50);
-      setWinnerPoints(100);
     }
     setError("");
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -93,7 +90,6 @@ export function CompetitionForm({ open, competition, onClose, onSaved }: Props) 
       body_scan_enabled: bodyScanEnabled,
       body_scan_metrics: bodyScanEnabled ? metrics : [],
       body_scan_goal_points: bodyScanEnabled ? Math.max(0, goalPoints) : 0,
-      body_scan_winner_points: bodyScanEnabled ? Math.max(0, winnerPoints) : 0,
     };
 
     setSaving(true);
@@ -184,17 +180,11 @@ export function CompetitionForm({ open, competition, onClose, onSaved }: Props) 
                     </label>
                   ))}
                 </div>
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="space-y-1.5">
-                    <Label className="text-xs text-slate-500">Points for first scan</Label>
-                    <Input type="number" min={0} value={goalPoints} onChange={(e) => setGoalPoints(Number(e.target.value))} />
-                  </div>
-                  <div className="space-y-1.5">
-                    <Label className="text-xs text-slate-500">Winning team bonus</Label>
-                    <Input type="number" min={0} value={winnerPoints} onChange={(e) => setWinnerPoints(Number(e.target.value))} />
-                  </div>
+                <div className="space-y-1.5">
+                  <Label className="text-xs text-slate-500">Points for first scan</Label>
+                  <Input type="number" min={0} value={goalPoints} onChange={(e) => setGoalPoints(Number(e.target.value))} />
                 </div>
-                <p className="text-xs text-slate-400">Members earn the first-scan points by submitting a scan. You declare the winning team on the Body Scan page.</p>
+                <p className="text-xs text-slate-400">Members earn the first-scan points by submitting a scan. After the competition, assign bonus points to each team from the Body Scan page based on their results.</p>
               </div>
             )}
           </div>

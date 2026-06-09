@@ -142,7 +142,40 @@ export function BodyScanPanel({ deviceToken }: { deviceToken: string }) {
               );
             })}
           </div>
-          <p className="text-xs text-slate-400 mt-3">{scans.length} scan{scans.length === 1 ? "" : "s"} logged. Only you can see these numbers.</p>
+          <p className="text-xs text-slate-400 mt-3">Only you can see these numbers.</p>
+        </div>
+      )}
+
+      {/* Full history */}
+      {hasFirstScan && (
+        <div className="bg-white rounded-xl border border-slate-200 p-5">
+          <h3 className="font-semibold text-slate-800 mb-3">
+            Scan History <span className="text-slate-400 font-normal text-sm">({scans.length})</span>
+          </h3>
+          <div className="space-y-2">
+            {[...scans].reverse().map((s, idx, arr) => {
+              const isLatest = idx === 0 && arr.length > 1;
+              const isFirst = idx === arr.length - 1;
+              return (
+                <div key={s.id} className="flex items-start justify-between gap-3 border-b border-slate-100 pb-2 last:border-0 last:pb-0">
+                  <div className="text-xs text-slate-400 flex-shrink-0">
+                    <div>{new Date(s.recorded_at).toLocaleDateString()}</div>
+                    <div>{new Date(s.recorded_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</div>
+                    {isFirst && <span className="text-orange-500 font-medium">first</span>}
+                    {isLatest && <span className="text-orange-500 font-medium">latest</span>}
+                  </div>
+                  <div className="flex flex-wrap gap-x-4 gap-y-1 justify-end text-sm">
+                    {metrics.map((m) => (
+                      <span key={m} className="text-slate-600">
+                        <span className="text-slate-400 text-xs">{METRIC_META[m].label}:</span>{" "}
+                        {s[m] != null ? `${s[m]}${METRIC_META[m].unit}` : "—"}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
         </div>
       )}
     </div>
