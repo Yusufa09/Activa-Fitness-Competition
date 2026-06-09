@@ -3,6 +3,7 @@
 import { AnimatePresence } from "framer-motion";
 import { useMemberSession } from "@/hooks/useMemberSession";
 import { useLeaderboard } from "@/hooks/useLeaderboard";
+import { teamTotal } from "@/lib/points";
 import { TeamCard } from "./TeamCard";
 import { Dumbbell } from "lucide-react";
 
@@ -10,7 +11,7 @@ export function LeaderboardStage() {
   const { state, loading: sessionLoading } = useMemberSession();
   const competitionId = state?.competition?.id ?? null;
   const { teams, loading } = useLeaderboard(competitionId);
-  const maxPoints = teams[0]?.total_points ?? 1;
+  const maxPoints = teams[0] ? teamTotal(teams[0]) : 1;
 
   const busy = sessionLoading || loading;
   const competition = state?.competition ?? null;

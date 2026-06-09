@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import Link from "next/link";
-import { Dumbbell, LayoutDashboard, Trophy, Users, LogOut, CalendarRange, UserCog } from "lucide-react";
+import { Dumbbell, LayoutDashboard, Trophy, Users, LogOut, CalendarRange, UserCog, Activity } from "lucide-react";
 
 const PUBLIC_PATHS = ["/admin", "/admin/signup", "/admin/accept-invite"];
 
@@ -49,6 +49,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     { href: "/admin/competitions", label: "Competitions", icon: CalendarRange },
     { href: "/admin/goals", label: "Goals", icon: Trophy },
     { href: "/admin/teams", label: "Teams", icon: Users },
+    { href: "/admin/body-scans", label: "Body Scan", icon: Activity },
     { href: "/admin/admins", label: "Administrators", icon: UserCog },
   ];
 

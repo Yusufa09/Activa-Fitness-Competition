@@ -75,6 +75,12 @@ CREATE TABLE competitions (
   start_date DATE NOT NULL,
   end_date   DATE NOT NULL,
   is_active  BOOLEAN NOT NULL DEFAULT TRUE,
+  -- Body scan settings
+  body_scan_enabled       BOOLEAN NOT NULL DEFAULT FALSE,
+  body_scan_metrics       TEXT[]  NOT NULL DEFAULT '{}',  -- subset of body_fat / muscle_mass / weight
+  body_scan_goal_points   INTEGER NOT NULL DEFAULT 0,     -- points for completing your first scan
+  body_scan_winner_points INTEGER NOT NULL DEFAULT 0,     -- bonus for the winning team
+  body_scan_winner_team_id UUID,                          -- null until the admin declares a winner
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
@@ -87,6 +93,7 @@ CREATE TABLE teams (
   name           TEXT NOT NULL,
   color          TEXT NOT NULL DEFAULT 'orange',
   total_points   INTEGER NOT NULL DEFAULT 0,
+  bonus_points   INTEGER NOT NULL DEFAULT 0,   -- durable team award (e.g. body-scan winner), separate from goal points
   created_at     TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
@@ -118,6 +125,7 @@ CREATE TABLE goals (
   starts_at        DATE,
   ends_at          DATE,
   is_active        BOOLEAN NOT NULL DEFAULT TRUE,
+  kind             TEXT NOT NULL DEFAULT 'standard',  -- 'standard' | 'body_scan' (auto-created, completed by submitting a scan)
   created_at       TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
@@ -159,6 +167,18 @@ CREATE TRIGGER trg_sync_goal_points
   FOR EACH ROW EXECUTE FUNCTION sync_points_on_goal_log();
 
 -- ============================================================
+-- BODY SCANS (private — multiple per enrollment; first vs latest compared)
+-- ============================================================
+CREATE TABLE body_scans (
+  id            UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  enrollment_id UUID NOT NULL REFERENCES enrollments(id) ON DELETE CASCADE,
+  body_fat      NUMERIC,   -- percent
+  muscle_mass   NUMERIC,   -- lbs
+  weight        NUMERIC,   -- lbs
+  recorded_at   TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- ============================================================
 -- ROW LEVEL SECURITY (writes go through service-role API routes)
 -- ============================================================
 ALTER TABLE gyms ENABLE ROW LEVEL SECURITY;
@@ -179,8 +199,9 @@ CREATE POLICY "enrollments_public_read" ON enrollments FOR SELECT USING (true);
 ALTER TABLE goal_logs ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "goal_logs_public_read" ON goal_logs FOR SELECT USING (true);
 
--- members, gym_admins, admin_invites: no public policies — only the
--- service-role API can read/write them (password hashes stay private).
+-- members, gym_admins, admin_invites, body_scans: no public policies — only
+-- the service-role API can read/write them (private personal data).
+ALTER TABLE body_scans ENABLE ROW LEVEL SECURITY;
 ALTER TABLE members ENABLE ROW LEVEL SECURITY;
 ALTER TABLE gym_admins ENABLE ROW LEVEL SECURITY;
 ALTER TABLE admin_invites ENABLE ROW LEVEL SECURITY;

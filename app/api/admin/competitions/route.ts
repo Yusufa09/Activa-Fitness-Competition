@@ -24,7 +24,10 @@ export async function POST(req: NextRequest) {
   const ctx = await getAdminContext();
   if (!ctx) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const { name, start_date, end_date, team_names } = await req.json();
+  const {
+    name, start_date, end_date, team_names,
+    body_scan_enabled, body_scan_metrics, body_scan_goal_points, body_scan_winner_points,
+  } = await req.json();
 
   if (!name?.trim() || !start_date || !end_date) {
     return NextResponse.json({ error: "Name and dates are required." }, { status: 400 });
@@ -52,7 +55,13 @@ export async function POST(req: NextRequest) {
 
   const { data: competition, error } = await supabase
     .from("competitions")
-    .insert({ gym_id: ctx.gymId, name: name.trim(), start_date, end_date, is_active: true })
+    .insert({
+      gym_id: ctx.gymId, name: name.trim(), start_date, end_date, is_active: true,
+      body_scan_enabled: !!body_scan_enabled,
+      body_scan_metrics: body_scan_enabled ? (body_scan_metrics ?? []) : [],
+      body_scan_goal_points: body_scan_enabled ? (body_scan_goal_points ?? 0) : 0,
+      body_scan_winner_points: body_scan_enabled ? (body_scan_winner_points ?? 0) : 0,
+    })
     .select()
     .single();
 
@@ -68,7 +77,46 @@ export async function POST(req: NextRequest) {
   }));
   await supabase.from("teams").insert(teamRows);
 
+  if (body_scan_enabled) {
+    await syncBodyScanGoal(supabase, competition.id, true, body_scan_goal_points ?? 0);
+  }
+
   return NextResponse.json({ competition });
+}
+
+// Ensure the auto "Complete a Body Scan" goal matches the competition's settings.
+async function syncBodyScanGoal(
+  supabase: ReturnType<typeof createAdminClient>,
+  competitionId: string,
+  enabled: boolean,
+  points: number
+) {
+  const { data: existing } = await supabase
+    .from("goals")
+    .select("id")
+    .eq("competition_id", competitionId)
+    .eq("kind", "body_scan")
+    .maybeSingle();
+
+  if (!enabled) {
+    if (existing) await supabase.from("goals").update({ is_active: false }).eq("id", existing.id);
+    return;
+  }
+
+  if (existing) {
+    await supabase.from("goals").update({ points: Math.max(0, points), is_active: true }).eq("id", existing.id);
+  } else {
+    await supabase.from("goals").insert({
+      competition_id: competitionId,
+      title: "Complete a Body Scan",
+      description: "Submit your first body scan to earn points.",
+      points: Math.max(0, points),
+      target_count: 1,
+      is_refreshable: false,
+      kind: "body_scan",
+      is_active: true,
+    });
+  }
 }
 
 export async function PATCH(req: NextRequest) {
@@ -118,7 +166,7 @@ export async function PATCH(req: NextRequest) {
     return NextResponse.json({ competition: data });
   }
 
-  // Generic field updates (name/dates)
+  // Generic field updates (name/dates/body-scan settings)
   const { data, error } = await supabase
     .from("competitions")
     .update(updates)
@@ -127,6 +175,12 @@ export async function PATCH(req: NextRequest) {
     .select()
     .single();
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+
+  // Keep the auto body-scan goal in sync when body-scan settings change
+  if ("body_scan_enabled" in updates) {
+    await syncBodyScanGoal(supabase, id, !!updates.body_scan_enabled, updates.body_scan_goal_points ?? 0);
+  }
+
   return NextResponse.json({ competition: data });
 }
 

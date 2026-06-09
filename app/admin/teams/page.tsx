@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { QRCodeDisplay } from "@/components/admin/QRCodeDisplay";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { TEAM_COLORS } from "@/lib/points";
+import { TEAM_COLORS, teamTotal } from "@/lib/points";
 import { ChevronDown, ChevronUp, Pencil, Check, X, Plus, ArrowRightLeft, Search } from "lucide-react";
 import { toast } from "sonner";
 
@@ -15,6 +15,7 @@ interface TeamRow {
   name: string;
   color: string;
   total_points: number;
+  bonus_points?: number;
   enrollments: EnrollmentRow[];
 }
 interface CompetitionRow { id: string; name: string }
@@ -93,7 +94,7 @@ export default function TeamsPage() {
     );
   }
 
-  const maxPoints = Math.max(...teams.map((t) => t.total_points), 1);
+  const maxPoints = Math.max(...teams.map((t) => teamTotal(t)), 1);
   const query = search.trim().toLowerCase();
   const searchResults = query
     ? teams.flatMap((team) =>
@@ -247,12 +248,14 @@ export default function TeamsPage() {
                       <p className="text-slate-500 text-sm">{team.enrollments?.length ?? 0} members</p>
                     </div>
                     <div className="text-right flex-shrink-0">
-                      <p className={`text-3xl font-black ${colors.text}`}>{team.total_points.toLocaleString()}</p>
-                      <p className="text-slate-400 text-xs">total points</p>
+                      <p className={`text-3xl font-black ${colors.text}`}>{teamTotal(team).toLocaleString()}</p>
+                      <p className="text-slate-400 text-xs">
+                        total points{(team.bonus_points ?? 0) > 0 ? ` · incl. +${team.bonus_points} bonus` : ""}
+                      </p>
                     </div>
                   </div>
                   <div className="mt-3 h-2 bg-white/50 rounded-full overflow-hidden">
-                    <div className={`h-full ${colors.bar} rounded-full`} style={{ width: `${(team.total_points / maxPoints) * 100}%` }} />
+                    <div className={`h-full ${colors.bar} rounded-full`} style={{ width: `${(teamTotal(team) / maxPoints) * 100}%` }} />
                   </div>
                   <button onClick={() => setExpanded(isExpanded ? null : team.id)} className={`mt-4 flex items-center gap-1 text-sm font-medium ${colors.text} hover:underline`}>
                     {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}

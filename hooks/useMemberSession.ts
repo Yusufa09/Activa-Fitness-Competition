@@ -43,6 +43,7 @@ export function useMemberSession(): SessionResult {
           display_name: data.member.display_name,
           gym_id: data.gym.id,
           gym_name: data.gym.name,
+          body_scan_enabled: !!data.competition?.body_scan_enabled,
         });
         setState(data);
         setLoading(false);

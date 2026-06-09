@@ -4,6 +4,11 @@ export function toDateString(date: Date): string {
   return date.toISOString().split("T")[0];
 }
 
+// A team's standings total = points earned from goals + durable bonus (e.g. body-scan winner)
+export function teamTotal(t: { total_points: number; bonus_points?: number | null }): number {
+  return t.total_points + (t.bonus_points ?? 0);
+}
+
 // ISO week number, e.g. "2026-W23"
 export function getIsoWeekKey(date = new Date()): string {
   const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));

@@ -4,17 +4,20 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { clearSession, loadSession } from "@/lib/member-session";
-import { Dumbbell, LayoutGrid, Trophy, LogOut } from "lucide-react";
+import { Dumbbell, LayoutGrid, Trophy, LogOut, Activity } from "lucide-react";
 
 export function MemberNav() {
   const pathname = usePathname();
   const router = useRouter();
   const [gymName, setGymName] = useState("");
+  const [bodyScan, setBodyScan] = useState(false);
   const [confirming, setConfirming] = useState(false);
   const [signingOut, setSigningOut] = useState(false);
 
   useEffect(() => {
-    setGymName(loadSession()?.gym_name ?? "");
+    const s = loadSession();
+    setGymName(s?.gym_name ?? "");
+    setBodyScan(!!s?.body_scan_enabled);
   }, []);
 
   async function doSignOut() {
@@ -39,6 +42,7 @@ export function MemberNav() {
   const items = [
     { href: "/dashboard", label: "My Progress", icon: LayoutGrid },
     { href: "/leaderboard", label: "Leaderboard", icon: Trophy },
+    ...(bodyScan ? [{ href: "/body-scan", label: "Body Scan", icon: Activity }] : []),
   ];
 
   return (

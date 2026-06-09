@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { Users, Trophy, Zap, Crown } from "lucide-react";
 import { QRCodeDisplay } from "@/components/admin/QRCodeDisplay";
+import { teamTotal } from "@/lib/points";
 
 interface Stats {
   competitionName: string;
@@ -26,15 +27,16 @@ export default function AdminDashboardPage() {
     ]).then(([teamsData, goalsData]) => {
       if (teamsData.gym) setGym(teamsData.gym);
       if (teamsData.competition) {
-        const teams = teamsData.teams ?? [];
+        const teams = (teamsData.teams ?? []) as { name: string; total_points: number; bonus_points?: number; enrollments?: unknown[] }[];
         const goals = goalsData.goals ?? [];
-        const totalMembers = teams.reduce((s: number, t: { enrollments?: unknown[] }) => s + (t.enrollments?.length ?? 0), 0);
-        const totalPoints = teams.reduce((s: number, t: { total_points: number }) => s + t.total_points, 0);
+        const totalMembers = teams.reduce((s: number, t) => s + (t.enrollments?.length ?? 0), 0);
+        const totalPoints = teams.reduce((s: number, t) => s + teamTotal(t), 0);
         const activeGoals = goals.filter((g: { is_active: boolean }) => g.is_active).length;
+        const leader = [...teams].sort((a, b) => teamTotal(b) - teamTotal(a))[0];
         setStats({
           competitionName: teamsData.competition.name,
           totalMembers, totalPoints, activeGoals,
-          topTeam: teams[0]?.name ?? "—",
+          topTeam: leader?.name ?? "—",
         });
       }
       setLoading(false);

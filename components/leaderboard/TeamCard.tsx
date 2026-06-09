@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion";
 import { PointsTicker } from "./PointsTicker";
-import { TEAM_COLORS } from "@/lib/points";
+import { TEAM_COLORS, teamTotal } from "@/lib/points";
 import type { LeaderboardTeam } from "@/types";
 
 const RANK_MEDALS: Record<number, string> = { 1: "🥇", 2: "🥈", 3: "🥉" };
@@ -14,7 +14,8 @@ interface Props {
 
 export function TeamCard({ team, maxPoints }: Props) {
   const colors = TEAM_COLORS[team.color] ?? TEAM_COLORS.orange;
-  const barPct = maxPoints > 0 ? Math.max((team.total_points / maxPoints) * 100, 2) : 2;
+  const total = teamTotal(team);
+  const barPct = maxPoints > 0 ? Math.max((total / maxPoints) * 100, 2) : 2;
   const medal = RANK_MEDALS[team.rank];
 
   return (
@@ -37,7 +38,7 @@ export function TeamCard({ team, maxPoints }: Props) {
         </div>
         <div className="text-right">
           <p className={`text-4xl font-black ${colors.text}`}>
-            <PointsTicker value={team.total_points} />
+            <PointsTicker value={total} />
           </p>
           <p className="text-slate-400 text-xs mt-0.5">points</p>
         </div>

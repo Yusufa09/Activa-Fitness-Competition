@@ -24,6 +24,7 @@ export function useGoals(competitionId: string | null, enrollmentId: string | nu
         .select("*")
         .eq("competition_id", competitionId)
         .eq("is_active", true)
+        .eq("kind", "standard") // body_scan goals are handled on the Body Scan page
         .order("created_at"),
       supabase
         .from("goal_logs")

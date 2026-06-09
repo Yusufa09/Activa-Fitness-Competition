@@ -6,15 +6,19 @@ import { Badge } from "@/components/ui/badge";
 import { CompetitionForm } from "@/components/admin/CompetitionForm";
 import { Plus, Play, Square, Trash2, Pencil } from "lucide-react";
 import { toast } from "sonner";
-import { TEAM_COLORS } from "@/lib/points";
+import { TEAM_COLORS, teamTotal } from "@/lib/points";
 
-interface AdminTeam { id: string; name: string; color: string; total_points: number }
+interface AdminTeam { id: string; name: string; color: string; total_points: number; bonus_points?: number }
 interface AdminCompetition {
   id: string;
   name: string;
   start_date: string;
   end_date: string;
   is_active: boolean;
+  body_scan_enabled?: boolean;
+  body_scan_metrics?: ("body_fat" | "muscle_mass" | "weight")[];
+  body_scan_goal_points?: number;
+  body_scan_winner_points?: number;
   teams: AdminTeam[];
 }
 
@@ -100,7 +104,7 @@ export default function CompetitionsPage() {
                       const col = TEAM_COLORS[t.color] ?? TEAM_COLORS.orange;
                       return (
                         <span key={t.id} className={`text-xs font-medium px-2 py-1 rounded-full ${col.bg} ${col.text}`}>
-                          {t.name} · {t.total_points}pts
+                          {t.name} · {teamTotal(t)}pts
                         </span>
                       );
                     })}

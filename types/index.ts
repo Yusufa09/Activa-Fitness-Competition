@@ -27,6 +27,8 @@ export interface AdminInvite {
   created_at: string;
 }
 
+export type BodyScanMetric = "body_fat" | "muscle_mass" | "weight";
+
 export interface Competition {
   id: string;
   gym_id: string;
@@ -34,7 +36,21 @@ export interface Competition {
   start_date: string;
   end_date: string;
   is_active: boolean;
+  body_scan_enabled: boolean;
+  body_scan_metrics: BodyScanMetric[];
+  body_scan_goal_points: number;
+  body_scan_winner_points: number;
+  body_scan_winner_team_id: string | null;
   created_at: string;
+}
+
+export interface BodyScan {
+  id: string;
+  enrollment_id: string;
+  body_fat: number | null;
+  muscle_mass: number | null;
+  weight: number | null;
+  recorded_at: string;
 }
 
 export interface Team {
@@ -43,6 +59,7 @@ export interface Team {
   name: string;
   color: TeamColor;
   total_points: number;
+  bonus_points: number;
   created_at: string;
 }
 
@@ -101,6 +118,7 @@ export interface MemberSession {
   display_name: string;
   gym_id: string;
   gym_name: string;
+  body_scan_enabled?: boolean;
 }
 
 // Resolved state returned by register/session APIs
