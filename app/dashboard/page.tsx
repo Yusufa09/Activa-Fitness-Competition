@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { useMemberSession } from "@/hooks/useMemberSession";
 import { useGoals } from "@/hooks/useGoals";
+import { useMyPoints } from "@/hooks/useMyPoints";
 import { MemberHeader } from "@/components/dashboard/MemberHeader";
 import { CompetitionBanner } from "@/components/dashboard/CompetitionBanner";
 import { GoalCard } from "@/components/dashboard/GoalCard";
@@ -18,16 +18,14 @@ export default function DashboardPage() {
   const enrollmentId = state?.enrollment?.id ?? null;
   const { goals, loading: goalsLoading, refetch: refetchGoals } = useGoals(competitionId, enrollmentId);
 
-  // Local points mirror enrollment, but update instantly when a goal is logged
-  const [myPoints, setMyPoints] = useState(0);
-  useEffect(() => {
-    if (state?.enrollment) setMyPoints(state.enrollment.points);
-  }, [state?.enrollment]);
+  // Read the member's points DIRECTLY from enrollments (live), not from the
+  // session snapshot — same reliable path the team leaderboard uses.
+  const { points: myPoints, refetch: refetchPoints } = useMyPoints(enrollmentId);
 
-  function handleLogged(newTotal: number) {
-    setMyPoints(newTotal); // authoritative total from the server response
-    refetchGoals();
-    refetch(); // refresh goals progress + leaderboard
+  function handleLogged() {
+    refetchPoints();  // re-read my points straight from the DB
+    refetchGoals();   // refresh goal progress
+    refetch();        // refresh session (team/competition)
   }
 
   if (loading || !state) {
