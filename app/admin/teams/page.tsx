@@ -45,7 +45,8 @@ export default function TeamsPage() {
   }
 
   useEffect(() => {
-    setAppUrl(process.env.NEXT_PUBLIC_APP_URL || window.location.origin);
+    // Use the current site's domain so the QR always points to the real URL
+    setAppUrl(window.location.origin);
     fetchData();
   }, []);
 

@@ -20,7 +20,8 @@ export default function AdminDashboardPage() {
   const [appUrl, setAppUrl] = useState("");
 
   useEffect(() => {
-    setAppUrl(process.env.NEXT_PUBLIC_APP_URL || window.location.origin);
+    // Use the current site's domain so the QR always points to the real URL
+    setAppUrl(window.location.origin);
     Promise.all([
       fetch("/api/admin/teams").then((r) => r.json()),
       fetch("/api/admin/goals").then((r) => r.json()),
