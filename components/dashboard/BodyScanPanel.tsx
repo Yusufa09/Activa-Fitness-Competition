@@ -6,12 +6,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { Activity, TrendingUp, TrendingDown, Minus } from "lucide-react";
+import { MetricLineChart } from "@/components/dashboard/MetricLineChart";
 import type { BodyScan, BodyScanMetric } from "@/types";
 
-const METRIC_META: Record<BodyScanMetric, { label: string; unit: string; betterWhenLower: boolean | null }> = {
-  body_fat: { label: "Body Fat", unit: "%", betterWhenLower: true },
-  muscle_mass: { label: "Muscle Mass", unit: "lbs", betterWhenLower: false },
-  weight: { label: "Weight", unit: "lbs", betterWhenLower: null },
+const METRIC_META: Record<BodyScanMetric, { label: string; unit: string; betterWhenLower: boolean | null; color: string }> = {
+  body_fat: { label: "Body Fat", unit: "%", betterWhenLower: true, color: "#f43f5e" },
+  muscle_mass: { label: "Muscle Mass", unit: "lbs", betterWhenLower: false, color: "#10b981" },
+  weight: { label: "Weight", unit: "lbs", betterWhenLower: null, color: "#3b82f6" },
 };
 
 interface ScanInfo {
@@ -143,6 +144,21 @@ export function BodyScanPanel({ deviceToken }: { deviceToken: string }) {
             })}
           </div>
           <p className="text-xs text-slate-400 mt-3">Only you can see these numbers.</p>
+        </div>
+      )}
+
+      {/* Trends — one line graph per metric */}
+      {hasFirstScan && (
+        <div className="space-y-3">
+          <h3 className="font-semibold text-slate-800 px-1">Trends</h3>
+          {metrics.map((m) => {
+            const meta = METRIC_META[m];
+            const pts = scans
+              .filter((s) => s[m] != null)
+              .map((s) => ({ date: s.recorded_at, value: Number(s[m]) }));
+            if (pts.length === 0) return null;
+            return <MetricLineChart key={m} label={meta.label} unit={meta.unit} color={meta.color} points={pts} />;
+          })}
         </div>
       )}
 
