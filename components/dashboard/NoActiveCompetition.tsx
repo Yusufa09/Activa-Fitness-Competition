@@ -1,8 +1,14 @@
 import { FITNESS_TIPS, TEAM_COLORS } from "@/lib/points";
 import { Sparkles } from "lucide-react";
-import type { LastCompetitionResult } from "@/types";
+import type { BodyScanMetric, LastCompetitionResult } from "@/types";
 
 const MEDAL: Record<number, string> = { 1: "🥇", 2: "🥈", 3: "🥉" };
+
+const SCAN_META: Record<BodyScanMetric, { label: string; unit: string; betterWhenLower: boolean | null }> = {
+  body_fat: { label: "Body Fat", unit: "%", betterWhenLower: true },
+  muscle_mass: { label: "Muscle Mass", unit: "lbs", betterWhenLower: false },
+  weight: { label: "Weight", unit: "lbs", betterWhenLower: null },
+};
 
 function ordinal(n: number) {
   const s = ["th", "st", "nd", "rd"];
@@ -51,6 +57,39 @@ export function NoActiveCompetition({
                 );
               })}
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Member's own body scan summary, if they participated */}
+      {lastResult?.body_scan && lastResult.body_scan.rows.length > 0 && (
+        <div className="bg-white rounded-2xl border border-slate-200 p-5">
+          <h2 className="font-semibold text-slate-800 mb-1">Your Body Scan Results</h2>
+          <p className="text-xs text-slate-400 mb-3">From {lastResult.body_scan.scan_count} scan{lastResult.body_scan.scan_count === 1 ? "" : "s"} this competition.</p>
+          <div className="space-y-3">
+            {lastResult.body_scan.rows.map((r) => {
+              const meta = SCAN_META[r.metric];
+              let color = "text-slate-500";
+              if (r.change != null && r.change !== 0 && meta.betterWhenLower !== null) {
+                const good = meta.betterWhenLower ? r.change < 0 : r.change > 0;
+                color = good ? "text-green-600" : "text-red-500";
+              }
+              return (
+                <div key={r.metric} className="flex items-center justify-between text-sm">
+                  <span className="text-slate-600">{meta.label}</span>
+                  <div className="flex items-center gap-3">
+                    <span className="text-slate-400">{r.first ?? "—"}{meta.unit}</span>
+                    <span className="text-slate-300">→</span>
+                    <span className="font-medium text-slate-700">{r.latest ?? "—"}{meta.unit}</span>
+                    {r.change != null && (
+                      <span className={`font-semibold w-16 text-right ${color}`}>
+                        {r.change > 0 ? "+" : ""}{r.change.toFixed(1)}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </div>
       )}

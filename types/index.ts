@@ -130,6 +130,16 @@ export interface LastResultStanding {
   total: number;
   rank: number;
 }
+export interface LastResultBodyScanRow {
+  metric: BodyScanMetric;
+  first: number | null;
+  latest: number | null;
+  change: number | null;
+}
+export interface LastResultBodyScan {
+  rows: LastResultBodyScanRow[];
+  scan_count: number;
+}
 export interface LastCompetitionResult {
   competition_name: string;
   team_id: string;
@@ -138,6 +148,7 @@ export interface LastCompetitionResult {
   rank: number;
   total_teams: number;
   standings: LastResultStanding[];
+  body_scan: LastResultBodyScan | null;
 }
 
 // Resolved state returned by register/session APIs

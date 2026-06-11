@@ -1,6 +1,6 @@
 import { createAdminClient } from "@/lib/supabase/admin";
 import { toDateString, teamTotal } from "@/lib/points";
-import type { Competition, Enrollment, Member, Team, MemberState, Gym, LastCompetitionResult, TeamColor } from "@/types";
+import type { Competition, Enrollment, Member, Team, MemberState, Gym, LastCompetitionResult, TeamColor, BodyScanMetric, LastResultBodyScan } from "@/types";
 
 type Supa = ReturnType<typeof createAdminClient>;
 
@@ -82,21 +82,23 @@ export async function ensureEnrollment(
 export async function getLastResult(supabase: Supa, member: Member): Promise<LastCompetitionResult | null> {
   const { data: rows } = await supabase
     .from("enrollments")
-    .select("team_id, competition:competitions(id, name, is_active, end_date, created_at)")
+    .select("id, team_id, competition:competitions(id, name, is_active, end_date, created_at, body_scan_enabled, body_scan_metrics)")
     .eq("member_id", member.id);
 
-  type Row = { team_id: string; competition: { id: string; name: string; is_active: boolean; end_date: string; created_at: string } | null };
+  type Comp = { id: string; name: string; is_active: boolean; end_date: string; created_at: string; body_scan_enabled: boolean; body_scan_metrics: BodyScanMetric[] };
+  type Row = { id: string; team_id: string; competition: Comp | null };
   const ended = ((rows ?? []) as unknown as Row[])
     .filter((r) => r.competition && !r.competition.is_active)
     .sort((a, b) => (b.competition!.end_date || b.competition!.created_at).localeCompare(a.competition!.end_date || a.competition!.created_at));
 
   const latest = ended[0];
   if (!latest || !latest.competition) return null;
+  const comp = latest.competition;
 
   const { data: teams } = await supabase
     .from("teams")
     .select("id, name, color, total_points, bonus_points")
-    .eq("competition_id", latest.competition.id);
+    .eq("competition_id", comp.id);
   if (!teams || teams.length === 0) return null;
 
   const ranked = [...teams]
@@ -106,14 +108,38 @@ export async function getLastResult(supabase: Supa, member: Member): Promise<Las
   const myTeam = ranked.find((t) => t.id === latest.team_id);
   if (!myTeam) return null;
 
+  // Member's own body scan summary (only if they participated)
+  let body_scan: LastResultBodyScan | null = null;
+  if (comp.body_scan_enabled) {
+    const { data: scans } = await supabase
+      .from("body_scans")
+      .select("body_fat, muscle_mass, weight, recorded_at")
+      .eq("enrollment_id", latest.id)
+      .order("recorded_at", { ascending: true });
+    if (scans && scans.length > 0) {
+      const first = scans[0];
+      const last = scans[scans.length - 1];
+      const metrics = (comp.body_scan_metrics ?? []) as BodyScanMetric[];
+      body_scan = {
+        scan_count: scans.length,
+        rows: metrics.map((m) => {
+          const f = first[m] != null ? Number(first[m]) : null;
+          const l = last[m] != null ? Number(last[m]) : null;
+          return { metric: m, first: f, latest: l, change: f != null && l != null ? l - f : null };
+        }),
+      };
+    }
+  }
+
   return {
-    competition_name: latest.competition.name,
+    competition_name: comp.name,
     team_id: myTeam.id,
     team_name: myTeam.name,
     team_color: myTeam.color,
     rank: myTeam.rank,
     total_teams: ranked.length,
     standings: ranked,
+    body_scan,
   };
 }
 
