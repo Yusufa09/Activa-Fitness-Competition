@@ -69,7 +69,7 @@ export default function AdminDashboardPage() {
               <p className="text-xs uppercase text-orange-600 font-medium tracking-wide">Gym Code</p>
               <p className="text-3xl font-black text-orange-700 tracking-widest mt-1">{gym.gym_code}</p>
             </div>
-            <QRCodeDisplay url={`${appUrl}/?gym=${gym.gym_code}`} label={`Scan to join · Code ${gym.gym_code}`} />
+            <QRCodeDisplay url={`${appUrl}/join/${gym.gym_code}`} label={`Scan to join · Code ${gym.gym_code}`} />
           </div>
         </div>
       )}

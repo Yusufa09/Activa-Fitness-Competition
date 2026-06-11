@@ -112,7 +112,7 @@ export default function TeamsPage() {
           {competition && <p className="text-slate-500 text-sm mt-0.5">{competition.name}</p>}
         </div>
         {appUrl && gymCode && (
-          <QRCodeDisplay url={`${appUrl}/?gym=${gymCode}`} label={`Scan to join · Code ${gymCode}`} />
+          <QRCodeDisplay url={`${appUrl}/join/${gymCode}`} label={`Scan to join · Code ${gymCode}`} />
         )}
       </div>
 
