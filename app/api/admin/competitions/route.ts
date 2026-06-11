@@ -3,6 +3,7 @@ export const dynamic = "force-dynamic";
 import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getAdminContext } from "@/lib/admin-auth";
+import { endExpiredCompetitions } from "@/lib/enrollment";
 import { TEAM_COLOR_PALETTE } from "@/lib/points";
 
 export async function GET() {
@@ -10,9 +11,10 @@ export async function GET() {
   if (!ctx) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const supabase = createAdminClient();
+  await endExpiredCompetitions(supabase, ctx.gymId);
   const { data, error } = await supabase
     .from("competitions")
-    .select("*, teams(id, name, color, total_points)")
+    .select("*, teams(id, name, color, total_points, bonus_points)")
     .eq("gym_id", ctx.gymId)
     .order("created_at", { ascending: false });
 

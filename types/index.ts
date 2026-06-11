@@ -121,12 +121,32 @@ export interface MemberSession {
   body_scan_enabled?: boolean;
 }
 
+// Final standings of a member's most recent ended competition (shown on the
+// in-between screen until the next competition starts).
+export interface LastResultStanding {
+  id: string;
+  name: string;
+  color: TeamColor;
+  total: number;
+  rank: number;
+}
+export interface LastCompetitionResult {
+  competition_name: string;
+  team_id: string;
+  team_name: string;
+  team_color: TeamColor;
+  rank: number;
+  total_teams: number;
+  standings: LastResultStanding[];
+}
+
 // Resolved state returned by register/session APIs
 export interface MemberState {
   member: Member;
   gym: Gym;
   competition: Competition | null;
   enrollment: (Enrollment & { team: Team }) | null;
+  last_result?: LastCompetitionResult | null;
 }
 
 export interface LeaderboardTeam extends Team {

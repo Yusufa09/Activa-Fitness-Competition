@@ -44,7 +44,7 @@ export default function DashboardPage() {
 
       <div className="max-w-lg mx-auto px-4 pt-6 space-y-4">
         {!hasCompetition ? (
-          <NoActiveCompetition displayName={state.member.display_name} />
+          <NoActiveCompetition displayName={state.member.display_name} lastResult={state.last_result} />
         ) : (
           <>
             <MemberHeader
