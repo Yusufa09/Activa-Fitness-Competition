@@ -65,27 +65,31 @@ export function MemberNav() {
           </span>
         </Link>
 
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-0.5 sm:gap-1 flex-shrink-0">
           {items.map(({ href, label, icon: Icon }) => {
             const active = pathname === href;
             return (
               <Link
                 key={href}
                 href={href}
-                className={`flex items-center gap-1.5 text-xs sm:text-sm font-medium px-3 py-2 rounded-md transition-colors ${
+                title={label}
+                aria-label={label}
+                className={`flex items-center gap-1.5 text-sm font-medium px-2.5 sm:px-3 py-2 rounded-md transition-colors ${
                   active ? "bg-orange-50 text-orange-700" : "text-slate-500 hover:text-orange-600 hover:bg-orange-50"
                 }`}
               >
-                <Icon className="w-4 h-4" />
-                <span>{label}</span>
+                <Icon className="w-5 h-5 sm:w-4 sm:h-4" />
+                <span className="hidden sm:inline">{label}</span>
               </Link>
             );
           })}
           <button
             onClick={() => setConfirming(true)}
-            className="flex items-center gap-1.5 text-xs sm:text-sm font-medium px-3 py-2 rounded-md text-slate-500 hover:text-red-600 hover:bg-red-50 transition-colors"
+            title="Sign Out"
+            aria-label="Sign Out"
+            className="flex items-center gap-1.5 text-sm font-medium px-2.5 sm:px-3 py-2 rounded-md text-slate-500 hover:text-red-600 hover:bg-red-50 transition-colors"
           >
-            <LogOut className="w-4 h-4" />
+            <LogOut className="w-5 h-5 sm:w-4 sm:h-4" />
             <span className="hidden sm:inline">Sign Out</span>
           </button>
         </div>
