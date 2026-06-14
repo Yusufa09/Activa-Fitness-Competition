@@ -1,10 +1,20 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import type { PersonalGoal } from "@/types";
+import type { PersonalGoalWithProgress } from "@/types";
+
+export interface PersonalGoalInput {
+  title: string;
+  description?: string;
+  target_count?: number;
+  is_refreshable?: boolean;
+  refresh_interval?: "daily" | "weekly" | null;
+  starts_at?: string | null;
+  ends_at?: string | null;
+}
 
 export function usePersonalGoals(deviceToken: string | null) {
-  const [goals, setGoals] = useState<PersonalGoal[]>([]);
+  const [goals, setGoals] = useState<PersonalGoalWithProgress[]>([]);
   const [loading, setLoading] = useState(true);
 
   const refetch = useCallback(async () => {
@@ -19,40 +29,21 @@ export function usePersonalGoals(deviceToken: string | null) {
 
   useEffect(() => { refetch(); }, [refetch]);
 
-  async function add(title: string, description: string) {
+  async function send(method: string, payload: Record<string, unknown>) {
     const res = await fetch("/api/personal-goals", {
-      method: "POST",
+      method,
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ device_token: deviceToken, title, description }),
+      body: JSON.stringify({ device_token: deviceToken, ...payload }),
     });
-    const d = await res.json();
-    if (!res.ok) throw new Error(d.error ?? "Could not add goal.");
-    await refetch();
+    const d = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(d.error ?? "Something went wrong.");
+    return d;
   }
 
-  async function update(id: string, updates: Partial<{ title: string; description: string; completed: boolean }>) {
-    const res = await fetch("/api/personal-goals", {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ device_token: deviceToken, id, ...updates }),
-    });
-    const d = await res.json();
-    if (!res.ok) throw new Error(d.error ?? "Could not update goal.");
-    await refetch();
-  }
+  const add = (g: PersonalGoalInput) => send("POST", g).then(refetch);
+  const edit = (id: string, g: PersonalGoalInput) => send("PATCH", { id, ...g }).then(refetch);
+  const remove = (id: string) => send("DELETE", { id }).then(refetch);
+  const log = (id: string) => send("PATCH", { id, action: "log" }).then(refetch);
 
-  async function remove(id: string) {
-    const res = await fetch("/api/personal-goals", {
-      method: "DELETE",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ device_token: deviceToken, id }),
-    });
-    if (!res.ok) {
-      const d = await res.json();
-      throw new Error(d.error ?? "Could not delete goal.");
-    }
-    await refetch();
-  }
-
-  return { goals, loading, add, update, remove, refetch };
+  return { goals, loading, add, edit, remove, log, refetch };
 }

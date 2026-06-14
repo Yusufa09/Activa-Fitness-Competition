@@ -182,12 +182,18 @@ CREATE TABLE body_scans (
 -- PERSONAL GOALS (private — a member's own goals for a competition)
 -- ============================================================
 CREATE TABLE personal_goals (
-  id            UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  enrollment_id UUID NOT NULL REFERENCES enrollments(id) ON DELETE CASCADE,
-  title         TEXT NOT NULL,
-  description   TEXT,
-  completed     BOOLEAN NOT NULL DEFAULT FALSE,
-  created_at    TIMESTAMPTZ NOT NULL DEFAULT NOW()
+  id               UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  enrollment_id    UUID NOT NULL REFERENCES enrollments(id) ON DELETE CASCADE,
+  title            TEXT NOT NULL,
+  description      TEXT,
+  target_count     INTEGER NOT NULL DEFAULT 1,
+  is_refreshable   BOOLEAN NOT NULL DEFAULT FALSE,
+  refresh_interval TEXT CHECK (refresh_interval IN ('daily', 'weekly')),
+  starts_at        DATE,
+  ends_at          DATE,
+  progress_count   INTEGER NOT NULL DEFAULT 0,   -- completions in the current period
+  period_key       TEXT NOT NULL DEFAULT 'once', -- which period progress_count applies to
+  created_at       TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
 -- ============================================================

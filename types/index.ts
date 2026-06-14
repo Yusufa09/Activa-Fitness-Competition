@@ -100,8 +100,21 @@ export interface PersonalGoal {
   enrollment_id: string;
   title: string;
   description: string | null;
-  completed: boolean;
+  target_count: number;
+  is_refreshable: boolean;
+  refresh_interval: RefreshInterval | null;
+  starts_at: string | null;
+  ends_at: string | null;
+  progress_count: number;
+  period_key: string;
   created_at: string;
+}
+
+// Personal goal enriched with current-period progress for display
+export interface PersonalGoalWithProgress extends PersonalGoal {
+  progress: number;
+  completed: boolean;
+  active: boolean; // within its date window right now
 }
 
 export interface GoalLog {
