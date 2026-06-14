@@ -6,7 +6,8 @@ import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Dumbbell, Copy, Check } from "lucide-react";
+import { Copy, Check } from "lucide-react";
+import { Logo } from "@/components/Logo";
 import { isValidEmail } from "@/lib/validation";
 
 export default function GymSignupPage() {
@@ -94,9 +95,7 @@ export default function GymSignupPage() {
     <main className="min-h-screen flex items-center justify-center bg-white px-4">
       <div className="w-full max-w-sm">
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-14 h-14 bg-orange-600 rounded-xl mb-4">
-            <Dumbbell className="w-7 h-7 text-white" />
-          </div>
+          <Logo className="w-16 h-16 mx-auto mb-3" />
           <h1 className="text-2xl font-bold text-slate-800">Create a Gym</h1>
           <p className="text-slate-500 text-sm mt-1">Set up your gym and admin account.</p>
         </div>

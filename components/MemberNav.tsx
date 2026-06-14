@@ -4,7 +4,8 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { clearSession, loadSession } from "@/lib/member-session";
-import { Dumbbell, LayoutGrid, Trophy, LogOut, Activity } from "lucide-react";
+import { LayoutGrid, Trophy, LogOut, Activity } from "lucide-react";
+import { Logo } from "@/components/Logo";
 
 export function MemberNav() {
   const pathname = usePathname();
@@ -59,7 +60,7 @@ export function MemberNav() {
     <nav className="bg-white border-b border-slate-200 sticky top-0 z-20">
       <div className="max-w-3xl mx-auto px-4 h-14 flex items-center justify-between">
         <Link href="/dashboard" className="flex items-center gap-2 min-w-0">
-          <Dumbbell className="w-5 h-5 text-orange-600 flex-shrink-0" />
+          <Logo className="w-8 h-8 flex-shrink-0" />
           <span className="font-bold text-slate-800 text-sm truncate max-w-[40vw] sm:max-w-none">
             {gymName || "Activa"}
           </span>

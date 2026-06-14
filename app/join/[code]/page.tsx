@@ -1,6 +1,6 @@
 import { createAdminClient } from "@/lib/supabase/admin";
 import { GymJoinForm } from "@/components/join/GymJoinForm";
-import { Dumbbell } from "lucide-react";
+import { Logo } from "@/components/Logo";
 
 export const dynamic = "force-dynamic";
 
@@ -23,9 +23,7 @@ export default async function GymJoinPage({ params }: Props) {
     <main className="min-h-screen flex flex-col items-center justify-center bg-white px-4 py-12">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-orange-600 rounded-2xl mb-4 shadow-lg">
-            <Dumbbell className="w-8 h-8 text-white" />
-          </div>
+          <Logo className="w-20 h-20 mx-auto mb-3" />
           {gym ? (
             <>
               <h1 className="text-3xl font-bold text-slate-800">Join {gym.name}</h1>

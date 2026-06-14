@@ -4,7 +4,8 @@ import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import Link from "next/link";
-import { Dumbbell, LayoutDashboard, Trophy, Users, LogOut, CalendarRange, UserCog, Activity, History } from "lucide-react";
+import { LayoutDashboard, Trophy, Users, LogOut, CalendarRange, UserCog, Activity, History } from "lucide-react";
+import { Logo } from "@/components/Logo";
 
 const PUBLIC_PATHS = ["/admin", "/admin/signup", "/admin/accept-invite"];
 
@@ -39,7 +40,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   if (checking) {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center">
-        <Dumbbell className="w-8 h-8 text-orange-500 animate-pulse" />
+        <Logo className="w-12 h-12 animate-pulse" />
       </div>
     );
   }
@@ -58,7 +59,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     <div className="min-h-screen bg-white flex">
       <aside className="w-56 bg-slate-900 flex flex-col py-6 px-4 fixed h-full">
         <div className="flex items-center gap-2 mb-1 px-2">
-          <Dumbbell className="w-6 h-6 text-orange-400 flex-shrink-0" />
+          <div className="bg-white rounded-lg p-0.5 flex-shrink-0">
+            <Logo className="w-6 h-6" />
+          </div>
           <span className="text-white font-bold text-sm truncate">{gym?.name ?? "Gym Administrator"}</span>
         </div>
         {gym ? (

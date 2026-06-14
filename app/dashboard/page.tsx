@@ -9,7 +9,7 @@ import { GoalCard } from "@/components/dashboard/GoalCard";
 import { MiniLeaderboard } from "@/components/dashboard/MiniLeaderboard";
 import { NoActiveCompetition } from "@/components/dashboard/NoActiveCompetition";
 import { MemberNav } from "@/components/MemberNav";
-import { Dumbbell } from "lucide-react";
+import { Logo } from "@/components/Logo";
 
 export default function DashboardPage() {
   const { state, deviceToken, loading, refetch } = useMemberSession();
@@ -31,7 +31,7 @@ export default function DashboardPage() {
   if (loading || !state) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-white">
-        <Dumbbell className="w-10 h-10 text-orange-500 animate-pulse" />
+        <Logo className="w-14 h-14 animate-pulse" />
       </div>
     );
   }

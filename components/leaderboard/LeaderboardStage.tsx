@@ -5,7 +5,7 @@ import { useMemberSession } from "@/hooks/useMemberSession";
 import { useLeaderboard } from "@/hooks/useLeaderboard";
 import { teamTotal } from "@/lib/points";
 import { TeamCard } from "./TeamCard";
-import { Dumbbell } from "lucide-react";
+import { Logo } from "@/components/Logo";
 
 export function LeaderboardStage() {
   const { state, loading: sessionLoading } = useMemberSession();
@@ -19,8 +19,8 @@ export function LeaderboardStage() {
   return (
     <div className="min-h-[calc(100vh-3.5rem)] bg-white flex flex-col">
       <header className="pt-10 pb-6 px-6 text-center">
-        <div className="inline-flex items-center gap-3 bg-orange-50 border border-orange-100 rounded-2xl px-6 py-3">
-          <Dumbbell className="w-7 h-7 text-orange-500" />
+        <div className="inline-flex items-center gap-2 bg-orange-50 border border-orange-100 rounded-2xl px-6 py-3">
+          <Logo className="w-8 h-8" />
           <h1 className="text-3xl font-black text-slate-800 tracking-tight">
             {competition ? competition.name : "Leaderboard"}
           </h1>

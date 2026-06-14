@@ -6,7 +6,7 @@ import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Dumbbell } from "lucide-react";
+import { Logo } from "@/components/Logo";
 import { isValidEmail } from "@/lib/validation";
 
 export default function AcceptInvitePage() {
@@ -52,9 +52,7 @@ export default function AcceptInvitePage() {
     <main className="min-h-screen flex items-center justify-center bg-white px-4">
       <div className="w-full max-w-sm">
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-14 h-14 bg-orange-600 rounded-xl mb-4">
-            <Dumbbell className="w-7 h-7 text-white" />
-          </div>
+          <Logo className="w-16 h-16 mx-auto mb-3" />
           <h1 className="text-2xl font-bold text-slate-800">Accept Invite</h1>
           <p className="text-slate-500 text-sm mt-1">You were invited to manage a gym. Create your account.</p>
         </div>
