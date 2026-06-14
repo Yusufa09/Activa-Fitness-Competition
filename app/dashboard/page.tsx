@@ -8,6 +8,7 @@ import { CompetitionBanner } from "@/components/dashboard/CompetitionBanner";
 import { GoalCard } from "@/components/dashboard/GoalCard";
 import { MiniLeaderboard } from "@/components/dashboard/MiniLeaderboard";
 import { NoActiveCompetition } from "@/components/dashboard/NoActiveCompetition";
+import { PersonalGoals } from "@/components/dashboard/PersonalGoals";
 import { MemberNav } from "@/components/MemberNav";
 import { Logo } from "@/components/Logo";
 
@@ -78,6 +79,8 @@ export default function DashboardPage() {
                 </div>
               )}
             </div>
+
+            <PersonalGoals deviceToken={deviceToken!} compact />
 
             <MiniLeaderboard competitionId={state.competition!.id} />
           </>

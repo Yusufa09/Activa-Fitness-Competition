@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { clearSession, loadSession } from "@/lib/member-session";
-import { LayoutGrid, Trophy, LogOut, Activity } from "lucide-react";
+import { LayoutGrid, Trophy, LogOut, Activity, Target } from "lucide-react";
 import { Logo } from "@/components/Logo";
 
 export function MemberNav() {
@@ -52,6 +52,7 @@ export function MemberNav() {
 
   const items = [
     { href: "/dashboard", label: "My Progress", icon: LayoutGrid },
+    { href: "/goals", label: "My Goals", icon: Target },
     { href: "/leaderboard", label: "Leaderboard", icon: Trophy },
     ...(bodyScan ? [{ href: "/body-scan", label: "Body Scan", icon: Activity }] : []),
   ];

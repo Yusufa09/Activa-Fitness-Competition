@@ -179,6 +179,18 @@ CREATE TABLE body_scans (
 );
 
 -- ============================================================
+-- PERSONAL GOALS (private — a member's own goals for a competition)
+-- ============================================================
+CREATE TABLE personal_goals (
+  id            UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  enrollment_id UUID NOT NULL REFERENCES enrollments(id) ON DELETE CASCADE,
+  title         TEXT NOT NULL,
+  description   TEXT,
+  completed     BOOLEAN NOT NULL DEFAULT FALSE,
+  created_at    TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- ============================================================
 -- ROW LEVEL SECURITY (writes go through service-role API routes)
 -- ============================================================
 ALTER TABLE gyms ENABLE ROW LEVEL SECURITY;
@@ -199,9 +211,10 @@ CREATE POLICY "enrollments_public_read" ON enrollments FOR SELECT USING (true);
 ALTER TABLE goal_logs ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "goal_logs_public_read" ON goal_logs FOR SELECT USING (true);
 
--- members, gym_admins, admin_invites, body_scans: no public policies — only
--- the service-role API can read/write them (private personal data).
+-- members, gym_admins, admin_invites, body_scans, personal_goals: no public
+-- policies — only the service-role API can read/write them (private data).
 ALTER TABLE body_scans ENABLE ROW LEVEL SECURITY;
+ALTER TABLE personal_goals ENABLE ROW LEVEL SECURITY;
 ALTER TABLE members ENABLE ROW LEVEL SECURITY;
 ALTER TABLE gym_admins ENABLE ROW LEVEL SECURITY;
 ALTER TABLE admin_invites ENABLE ROW LEVEL SECURITY;

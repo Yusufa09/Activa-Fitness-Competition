@@ -95,6 +95,15 @@ export interface Goal {
   created_at: string;
 }
 
+export interface PersonalGoal {
+  id: string;
+  enrollment_id: string;
+  title: string;
+  description: string | null;
+  completed: boolean;
+  created_at: string;
+}
+
 export interface GoalLog {
   id: string;
   enrollment_id: string;
