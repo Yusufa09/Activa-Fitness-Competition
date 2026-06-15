@@ -59,5 +59,16 @@ export function useMemberSession(): SessionResult {
       });
   }, [router, tick]);
 
+  // Re-fetch when the user returns to the tab so competition state is never stale.
+  useEffect(() => {
+    function onVisible() {
+      if (document.visibilityState === "visible") {
+        setTick((t) => t + 1);
+      }
+    }
+    document.addEventListener("visibilitychange", onVisible);
+    return () => document.removeEventListener("visibilitychange", onVisible);
+  }, []);
+
   return { state, deviceToken, loading, refetch: () => setTick((t) => t + 1) };
 }

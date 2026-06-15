@@ -4,7 +4,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getAdminContext } from "@/lib/admin-auth";
 import { endExpiredCompetitions } from "@/lib/enrollment";
-import { TEAM_COLOR_PALETTE } from "@/lib/points";
+import { TEAM_COLOR_PALETTE, toDateString } from "@/lib/points";
 
 export async function GET() {
   const ctx = await getAdminContext();
@@ -145,6 +145,22 @@ export async function PATCH(req: NextRequest) {
         { status: 409 }
       );
     }
+
+    // Guard: don't let a competition with an already-expired end_date be
+    // activated — endExpiredCompetitions would immediately deactivate it again.
+    const { data: target } = await supabase
+      .from("competitions")
+      .select("end_date")
+      .eq("id", id)
+      .eq("gym_id", ctx.gymId)
+      .single();
+    if (target && target.end_date < toDateString(new Date())) {
+      return NextResponse.json(
+        { error: "This competition's end date has already passed. Update the dates before starting it." },
+        { status: 400 }
+      );
+    }
+
     const { data, error } = await supabase
       .from("competitions")
       .update({ is_active: true })
