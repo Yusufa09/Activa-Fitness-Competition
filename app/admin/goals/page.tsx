@@ -44,11 +44,11 @@ export default function GoalsPage() {
   if (!loading && !competitionId) {
     return (
       <div>
-        <h1 className="text-2xl font-bold text-slate-800 mb-6">Goals</h1>
+        <h1 className="text-2xl font-bold text-slate-800 mb-6">Challenges</h1>
         <div className="bg-white rounded-xl border border-slate-200 p-8 text-center text-slate-400">
           No active competition. Start one in{" "}
           <a href="/admin/competitions" className="text-orange-600 hover:underline">Competitions</a>{" "}
-          to add goals.
+          to add challenges.
         </div>
       </div>
     );
@@ -58,18 +58,18 @@ export default function GoalsPage() {
     <div>
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-slate-800">Goals</h1>
+          <h1 className="text-2xl font-bold text-slate-800">Challenges</h1>
           <p className="text-slate-500 text-sm mt-0.5">{goals.filter((g) => g.is_active).length} active</p>
         </div>
         <Button size="sm" onClick={() => { setEditing(null); setFormOpen(true); }} className="bg-orange-600 hover:bg-orange-700 text-white">
-          <Plus className="w-4 h-4 mr-1.5" /> New Goal
+          <Plus className="w-4 h-4 mr-1.5" /> New Challenge
         </Button>
       </div>
 
       {loading ? (
         <div className="space-y-3">{[1, 2, 3].map((i) => <div key={i} className="h-16 bg-white rounded-xl border border-slate-200 animate-pulse" />)}</div>
       ) : goals.length === 0 ? (
-        <div className="bg-white rounded-xl border border-slate-200 p-8 text-center text-slate-400">No goals yet. Create your first one!</div>
+        <div className="bg-white rounded-xl border border-slate-200 p-8 text-center text-slate-400">No challenges yet. Create your first one!</div>
       ) : (
         <div className="space-y-2">
           {goals.map((goal) => {

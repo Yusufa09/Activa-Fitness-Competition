@@ -48,7 +48,7 @@ export default function AdminDashboardPage() {
     ? [
         { label: "Members", value: stats.totalMembers, icon: Users, color: "text-orange-600" },
         { label: "Points Awarded", value: stats.totalPoints.toLocaleString(), icon: Zap, color: "text-amber-600" },
-        { label: "Active Goals", value: stats.activeGoals, icon: Trophy, color: "text-violet-600" },
+        { label: "Active Challenges", value: stats.activeGoals, icon: Trophy, color: "text-violet-600" },
         { label: "Leading Team", value: stats.topTeam, icon: Crown, color: "text-blue-600" },
       ]
     : [];
@@ -102,7 +102,7 @@ export default function AdminDashboardPage() {
             <h2 className="font-semibold text-slate-700 mb-2">Quick Links</h2>
             <div className="flex gap-3 flex-wrap">
               <a href="/leaderboard" target="_blank" className="text-sm text-orange-600 hover:underline">Open Leaderboard ↗</a>
-              <a href="/admin/goals" className="text-sm text-orange-600 hover:underline">Manage Goals →</a>
+              <a href="/admin/goals" className="text-sm text-orange-600 hover:underline">Manage Challenges →</a>
               <a href="/admin/teams" className="text-sm text-orange-600 hover:underline">View Teams →</a>
             </div>
           </div>

@@ -29,7 +29,7 @@ export function usePersonalGoals(deviceToken: string | null) {
 
   useEffect(() => { refetch(); }, [refetch]);
 
-  async function send(method: string, payload: Record<string, unknown>) {
+  async function send(method: string, payload: object) {
     const res = await fetch("/api/personal-goals", {
       method,
       headers: { "Content-Type": "application/json" },

@@ -32,7 +32,7 @@ export default function MyGoalsPage() {
             There&apos;s no active competition right now, so you can&apos;t set personal goals yet.
           </div>
         ) : (
-          deviceToken && <PersonalGoals deviceToken={deviceToken} />
+          deviceToken && <PersonalGoals deviceToken={deviceToken} manage />
         )}
       </div>
     </main>

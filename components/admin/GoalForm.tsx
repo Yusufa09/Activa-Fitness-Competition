@@ -89,7 +89,7 @@ export function GoalForm({ open, goal, competitionId, onClose, onSaved }: Props)
     <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
       <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>{isEdit ? "Edit Goal" : "New Goal"}</DialogTitle>
+          <DialogTitle>{isEdit ? "Edit Challenge" : "New Challenge"}</DialogTitle>
         </DialogHeader>
         <div className="space-y-4 pt-2">
           <div className="space-y-1.5">

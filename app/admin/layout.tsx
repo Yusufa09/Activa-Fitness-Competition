@@ -48,7 +48,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const navItems = [
     { href: "/admin/dashboard", label: "Dashboard", icon: LayoutDashboard },
     { href: "/admin/competitions", label: "Competitions", icon: CalendarRange },
-    { href: "/admin/goals", label: "Goals", icon: Trophy },
+    { href: "/admin/goals", label: "Challenges", icon: Trophy },
     { href: "/admin/teams", label: "Teams", icon: Users },
     { href: "/admin/body-scans", label: "Body Scan", icon: Activity },
     { href: "/admin/history", label: "History", icon: History },

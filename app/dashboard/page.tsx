@@ -59,7 +59,7 @@ export default function DashboardPage() {
 
             <div>
               <h2 className="text-sm font-semibold text-slate-500 uppercase tracking-wide mb-3 px-1">
-                Goals
+                Challenges
               </h2>
               {goalsLoading ? (
                 <div className="space-y-3">
@@ -69,7 +69,7 @@ export default function DashboardPage() {
                 </div>
               ) : goals.length === 0 ? (
                 <div className="bg-slate-50 rounded-xl border border-slate-200 p-6 text-center text-slate-400 text-sm">
-                  No goals yet. Check back soon!
+                  No challenges yet. Check back soon!
                 </div>
               ) : (
                 <div className="space-y-3">
@@ -80,7 +80,7 @@ export default function DashboardPage() {
               )}
             </div>
 
-            <PersonalGoals deviceToken={deviceToken!} compact />
+            <PersonalGoals deviceToken={deviceToken!} />
 
             <MiniLeaderboard competitionId={state.competition!.id} />
           </>
