@@ -19,19 +19,17 @@ export default function DashboardPage() {
   const enrollmentId = state?.enrollment?.id ?? null;
   const { goals, loading: goalsLoading, refetch: refetchGoals } = useGoals(competitionId, enrollmentId);
 
-  // Read the member's points DIRECTLY from enrollments (live), not from the
-  // session snapshot — same reliable path the team leaderboard uses.
   const { points: myPoints, refetch: refetchPoints } = useMyPoints(enrollmentId);
 
   function handleLogged() {
-    refetchPoints();  // re-read my points straight from the DB
-    refetchGoals();   // refresh goal progress
-    refetch();        // refresh session (team/competition)
+    refetchPoints();
+    refetchGoals();
+    refetch();
   }
 
   if (loading || !state) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-white">
+      <div className="min-h-screen flex items-center justify-center bg-white dark:bg-slate-950">
         <Logo className="w-14 h-14 animate-pulse" />
       </div>
     );
@@ -40,7 +38,7 @@ export default function DashboardPage() {
   const hasCompetition = !!state.competition && !!state.enrollment;
 
   return (
-    <main className="min-h-screen bg-white pb-12">
+    <main className="min-h-screen bg-white dark:bg-slate-950 pb-12">
       <MemberNav />
 
       <div className="max-w-lg mx-auto px-4 pt-6 space-y-4">
@@ -58,17 +56,17 @@ export default function DashboardPage() {
             <CompetitionBanner competition={state.competition!} />
 
             <div>
-              <h2 className="text-sm font-semibold text-slate-500 uppercase tracking-wide mb-3 px-1">
+              <h2 className="text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-3 px-1">
                 Challenges
               </h2>
               {goalsLoading ? (
                 <div className="space-y-3">
                   {[1, 2, 3].map((i) => (
-                    <div key={i} className="h-20 bg-slate-50 rounded-xl border border-slate-200 animate-pulse" />
+                    <div key={i} className="h-20 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 animate-pulse" />
                   ))}
                 </div>
               ) : goals.length === 0 ? (
-                <div className="bg-slate-50 rounded-xl border border-slate-200 p-6 text-center text-slate-400 text-sm">
+                <div className="bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-6 text-center text-slate-400 dark:text-slate-500 text-sm">
                   No challenges yet. Check back soon!
                 </div>
               ) : (

@@ -57,14 +57,14 @@ export const TEAM_COLOR_PALETTE: TeamColor[] = [
 ];
 
 export const TEAM_COLORS: Record<string, { bg: string; text: string; border: string; bar: string }> = {
-  orange:  { bg: "bg-orange-50",  text: "text-orange-700",  border: "border-orange-300",  bar: "bg-orange-500" },
-  rose:    { bg: "bg-rose-50",    text: "text-rose-700",    border: "border-rose-300",    bar: "bg-rose-500" },
-  blue:    { bg: "bg-blue-50",    text: "text-blue-700",    border: "border-blue-300",    bar: "bg-blue-500" },
-  emerald: { bg: "bg-emerald-50", text: "text-emerald-700", border: "border-emerald-300", bar: "bg-emerald-500" },
-  violet:  { bg: "bg-violet-50",  text: "text-violet-700",  border: "border-violet-300",  bar: "bg-violet-500" },
-  amber:   { bg: "bg-amber-50",   text: "text-amber-700",   border: "border-amber-300",   bar: "bg-amber-500" },
-  sky:     { bg: "bg-sky-50",     text: "text-sky-700",     border: "border-sky-300",     bar: "bg-sky-500" },
-  teal:    { bg: "bg-teal-50",    text: "text-teal-700",    border: "border-teal-300",    bar: "bg-teal-500" },
+  orange:  { bg: "bg-orange-50 dark:bg-orange-900/30",  text: "text-orange-700 dark:text-orange-300",  border: "border-orange-300 dark:border-orange-700",  bar: "bg-orange-500" },
+  rose:    { bg: "bg-rose-50 dark:bg-rose-900/30",      text: "text-rose-700 dark:text-rose-300",      border: "border-rose-300 dark:border-rose-700",      bar: "bg-rose-500" },
+  blue:    { bg: "bg-blue-50 dark:bg-blue-900/30",      text: "text-blue-700 dark:text-blue-300",      border: "border-blue-300 dark:border-blue-700",      bar: "bg-blue-500" },
+  emerald: { bg: "bg-emerald-50 dark:bg-emerald-900/30", text: "text-emerald-700 dark:text-emerald-300", border: "border-emerald-300 dark:border-emerald-700", bar: "bg-emerald-500" },
+  violet:  { bg: "bg-violet-50 dark:bg-violet-900/30",  text: "text-violet-700 dark:text-violet-300",  border: "border-violet-300 dark:border-violet-700",  bar: "bg-violet-500" },
+  amber:   { bg: "bg-amber-50 dark:bg-amber-900/30",    text: "text-amber-700 dark:text-amber-300",    border: "border-amber-300 dark:border-amber-700",    bar: "bg-amber-500" },
+  sky:     { bg: "bg-sky-50 dark:bg-sky-900/30",        text: "text-sky-700 dark:text-sky-300",        border: "border-sky-300 dark:border-sky-700",        bar: "bg-sky-500" },
+  teal:    { bg: "bg-teal-50 dark:bg-teal-900/30",      text: "text-teal-700 dark:text-teal-300",      border: "border-teal-300 dark:border-teal-700",      bar: "bg-teal-500" },
 };
 
 // Basic fitness tips shown when no competition is active (no points)

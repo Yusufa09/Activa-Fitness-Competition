@@ -17,15 +17,15 @@ export function LeaderboardStage() {
   const competition = state?.competition ?? null;
 
   return (
-    <div className="min-h-[calc(100vh-3.5rem)] bg-white flex flex-col">
+    <div className="min-h-[calc(100vh-3.5rem)] bg-white dark:bg-slate-950 flex flex-col">
       <header className="pt-10 pb-6 px-6 text-center">
-        <div className="inline-flex items-center gap-2 bg-orange-50 border border-orange-100 rounded-2xl px-6 py-3">
+        <div className="inline-flex items-center gap-2 bg-orange-50 dark:bg-orange-950/40 border border-orange-100 dark:border-orange-800 rounded-2xl px-6 py-3">
           <Logo className="w-8 h-8" />
-          <h1 className="text-3xl font-black text-slate-800 tracking-tight">
+          <h1 className="text-3xl font-black text-slate-800 dark:text-slate-100 tracking-tight">
             {competition ? competition.name : "Leaderboard"}
           </h1>
         </div>
-        <p className="text-slate-400 text-sm mt-3">
+        <p className="text-slate-400 dark:text-slate-500 text-sm mt-3">
           {competition ? "Updates in real time" : "No active competition"}
         </p>
       </header>
@@ -34,11 +34,11 @@ export function LeaderboardStage() {
         {busy ? (
           <div className="space-y-4">
             {[1, 2, 3, 4].map((i) => (
-              <div key={i} className="h-28 bg-slate-50 border border-slate-200 rounded-2xl animate-pulse" />
+              <div key={i} className="h-28 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl animate-pulse" />
             ))}
           </div>
         ) : !competition ? (
-          <div className="text-center text-slate-400 py-20">
+          <div className="text-center text-slate-400 dark:text-slate-500 py-20">
             <p className="text-lg">No competition is running right now.</p>
             <p className="text-sm mt-2">Check back when the next one starts!</p>
           </div>

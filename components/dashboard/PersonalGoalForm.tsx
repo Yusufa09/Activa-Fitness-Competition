@@ -87,31 +87,31 @@ export function PersonalGoalForm({ open, goal, onClose, onSave }: Props) {
           <div className="space-y-1.5">
             <Label>Times to complete</Label>
             <Input type="number" min={1} value={targetCount} onChange={(e) => setTargetCount(Number(e.target.value))} />
-            <p className="text-xs text-slate-400">Set above 1 for goals like &quot;go to the gym 3 times.&quot;</p>
+            <p className="text-xs text-slate-400 dark:text-slate-500">Set above 1 for goals like &quot;go to the gym 3 times.&quot;</p>
           </div>
 
-          <div className="rounded-lg border border-slate-200 p-3 space-y-3">
+          <div className="rounded-lg border border-slate-200 dark:border-slate-700 p-3 space-y-3">
             <label className="flex items-center gap-2 cursor-pointer">
               <input type="checkbox" checked={isRefreshable} onChange={(e) => setIsRefreshable(e.target.checked)} className="w-4 h-4 accent-orange-600" />
-              <span className="text-sm text-slate-700">Recurring (resets and can be done again)</span>
+              <span className="text-sm text-slate-700 dark:text-slate-200">Recurring (resets and can be done again)</span>
             </label>
             {isRefreshable && (
               <div className="flex gap-2">
                 <button type="button" onClick={() => setRefreshInterval("daily")}
-                  className={`flex-1 text-xs px-3 py-2 rounded-lg border ${refreshInterval === "daily" ? "bg-orange-600 text-white border-orange-600" : "border-slate-300 text-slate-600"}`}>Daily</button>
+                  className={`flex-1 text-xs px-3 py-2 rounded-lg border ${refreshInterval === "daily" ? "bg-orange-600 text-white border-orange-600" : "border-slate-300 dark:border-slate-600 text-slate-600 dark:text-slate-300"}`}>Daily</button>
                 <button type="button" onClick={() => setRefreshInterval("weekly")}
-                  className={`flex-1 text-xs px-3 py-2 rounded-lg border ${refreshInterval === "weekly" ? "bg-orange-600 text-white border-orange-600" : "border-slate-300 text-slate-600"}`}>Weekly</button>
+                  className={`flex-1 text-xs px-3 py-2 rounded-lg border ${refreshInterval === "weekly" ? "bg-orange-600 text-white border-orange-600" : "border-slate-300 dark:border-slate-600 text-slate-600 dark:text-slate-300"}`}>Weekly</button>
               </div>
             )}
           </div>
 
-          <div className="rounded-lg border border-slate-200 p-3 space-y-3">
-            <Label className="text-slate-700">When is this goal available?</Label>
+          <div className="rounded-lg border border-slate-200 dark:border-slate-700 p-3 space-y-3">
+            <Label className="text-slate-700 dark:text-slate-200">When is this goal available?</Label>
             <div className="flex gap-2">
               <button type="button" onClick={() => setWholeCompetition(true)}
-                className={`flex-1 text-xs px-3 py-2 rounded-lg border ${wholeCompetition ? "bg-orange-600 text-white border-orange-600" : "border-slate-300 text-slate-600"}`}>Whole competition</button>
+                className={`flex-1 text-xs px-3 py-2 rounded-lg border ${wholeCompetition ? "bg-orange-600 text-white border-orange-600" : "border-slate-300 dark:border-slate-600 text-slate-600 dark:text-slate-300"}`}>Whole competition</button>
               <button type="button" onClick={() => setWholeCompetition(false)}
-                className={`flex-1 text-xs px-3 py-2 rounded-lg border ${!wholeCompetition ? "bg-orange-600 text-white border-orange-600" : "border-slate-300 text-slate-600"}`}>Specific dates</button>
+                className={`flex-1 text-xs px-3 py-2 rounded-lg border ${!wholeCompetition ? "bg-orange-600 text-white border-orange-600" : "border-slate-300 dark:border-slate-600 text-slate-600 dark:text-slate-300"}`}>Specific dates</button>
             </div>
             {!wholeCompetition && (
               <div className="grid grid-cols-2 gap-3 pt-1">

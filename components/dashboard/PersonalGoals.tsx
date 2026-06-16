@@ -9,15 +9,13 @@ import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import type { PersonalGoalWithProgress } from "@/types";
 
-// manage=true → full management (add/edit/delete) for the My Goals page.
-// manage=false → read+complete list for the My Progress dashboard section.
 export function PersonalGoals({ deviceToken, manage = false }: { deviceToken: string; manage?: boolean }) {
   const { goals, loading, add, edit, remove, log } = usePersonalGoals(deviceToken);
   const [formOpen, setFormOpen] = useState(false);
   const [editing, setEditing] = useState<PersonalGoalWithProgress | null>(null);
 
   const skeleton = (
-    <div className="space-y-3">{[1, 2].map((i) => <div key={i} className="h-20 bg-slate-50 rounded-xl border border-slate-200 animate-pulse" />)}</div>
+    <div className="space-y-3">{[1, 2].map((i) => <div key={i} className="h-20 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 animate-pulse" />)}</div>
   );
 
   if (manage) {
@@ -28,7 +26,7 @@ export function PersonalGoals({ deviceToken, manage = false }: { deviceToken: st
         </Button>
 
         {loading ? skeleton : goals.length === 0 ? (
-          <div className="bg-slate-50 rounded-xl border border-slate-200 p-6 text-center text-slate-400 text-sm">
+          <div className="bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-6 text-center text-slate-400 dark:text-slate-500 text-sm">
             No personal goals yet. Add your first one above!
           </div>
         ) : (
@@ -54,17 +52,16 @@ export function PersonalGoals({ deviceToken, manage = false }: { deviceToken: st
     );
   }
 
-  // Dashboard section — only goals active in their date window
   const visible = goals.filter((g) => g.active);
   return (
     <div>
       <div className="flex items-center justify-between mb-3 px-1">
-        <h2 className="text-sm font-semibold text-slate-500 uppercase tracking-wide">Personal Goals</h2>
-        <Link href="/goals" className="text-xs text-orange-600 hover:underline font-medium">Manage →</Link>
+        <h2 className="text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide">Personal Goals</h2>
+        <Link href="/goals" className="text-xs text-orange-600 dark:text-orange-400 hover:underline font-medium">Manage →</Link>
       </div>
       {loading ? skeleton : visible.length === 0 ? (
-        <div className="bg-slate-50 rounded-xl border border-slate-200 p-6 text-center text-slate-400 text-sm">
-          No personal goals yet. <Link href="/goals" className="text-orange-600 hover:underline">Add some →</Link>
+        <div className="bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-6 text-center text-slate-400 dark:text-slate-500 text-sm">
+          No personal goals yet. <Link href="/goals" className="text-orange-600 dark:text-orange-400 hover:underline">Add some →</Link>
         </div>
       ) : (
         <div className="space-y-3">

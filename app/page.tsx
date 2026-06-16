@@ -12,7 +12,6 @@ export default function JoinPage() {
   const [gymCode, setGymCode] = useState<string | undefined>(undefined);
 
   useEffect(() => {
-    // Read ?gym=CODE from the URL (set by the gym's QR code)
     const params = new URLSearchParams(window.location.search);
     const code = params.get("gym");
     if (code) setGymCode(code.toUpperCase());
@@ -32,32 +31,32 @@ export default function JoinPage() {
 
   if (checking) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-white">
+      <div className="min-h-screen flex items-center justify-center bg-white dark:bg-slate-950">
         <div className="flex flex-col items-center gap-3">
           <Logo className="w-14 h-14 animate-pulse" />
-          <p className="text-slate-500 text-sm">Loading...</p>
+          <p className="text-slate-500 dark:text-slate-400 text-sm">Loading...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <main className="min-h-screen flex flex-col items-center justify-center bg-white px-4 py-12">
+    <main className="min-h-screen flex flex-col items-center justify-center bg-white dark:bg-slate-950 px-4 py-12">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/activa-logo.png" alt="Activa" className="w-60 h-auto mx-auto -mb-2" />
-          <p className="text-slate-500">Be active always.</p>
+          <p className="text-slate-500 dark:text-slate-400">Be active always.</p>
         </div>
 
-        <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-8">
-          <h2 className="text-xl font-semibold text-slate-800 mb-6">Sign In</h2>
+        <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 p-8">
+          <h2 className="text-xl font-semibold text-slate-800 dark:text-slate-100 mb-6">Sign In</h2>
           <JoinForm prefilledGymCode={gymCode} />
         </div>
 
-        <p className="text-center text-sm text-slate-400 mt-6">
+        <p className="text-center text-sm text-slate-400 dark:text-slate-500 mt-6">
           Gym administrator?{" "}
-          <a href="/admin" className="text-orange-600 hover:underline font-medium">
+          <a href="/admin" className="text-orange-600 dark:text-orange-400 hover:underline font-medium">
             Administrator login →
           </a>
         </p>

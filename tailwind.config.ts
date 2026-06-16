@@ -1,6 +1,7 @@
 import type { Config } from "tailwindcss";
 
 const config: Config = {
+  darkMode: "class",
   content: [
     "./pages/**/*.{js,ts,jsx,tsx,mdx}",
     "./components/**/*.{js,ts,jsx,tsx,mdx}",
@@ -12,6 +13,7 @@ const config: Config = {
   // Safelist guarantees every team's bar/badge classes are always generated.
   safelist: [
     { pattern: /^(bg|text|border)-(orange|rose|blue|emerald|violet|amber|sky|teal)-(50|300|500|700)$/ },
+    { pattern: /^(bg|text|border)-(orange|rose|blue|emerald|violet|amber|sky|teal)-(900)$/, variants: ["dark"] },
   ],
   theme: {
     extend: {
