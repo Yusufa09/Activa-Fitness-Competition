@@ -65,14 +65,12 @@ export function JoinForm({ prefilledGymCode }: JoinFormProps) {
   return (
     <div>
       {/* Mode toggle */}
-      <div className="flex gap-2 mb-5 bg-slate-100 dark:bg-slate-700 rounded-lg p-1">
+      <div className="flex gap-2 mb-5 bg-slate-100 rounded-lg p-1">
         <button
           type="button"
           onClick={() => { setMode("returning"); setError(""); }}
           className={`flex-1 text-sm font-medium py-2 rounded-md transition-colors ${
-            mode === "returning"
-              ? "bg-white dark:bg-slate-800 text-orange-700 dark:text-orange-400 shadow-sm"
-              : "text-slate-500 dark:text-slate-400"
+            mode === "returning" ? "bg-white text-orange-700 shadow-sm" : "text-slate-500"
           }`}
         >
           Returning
@@ -81,9 +79,7 @@ export function JoinForm({ prefilledGymCode }: JoinFormProps) {
           type="button"
           onClick={() => { setMode("first"); setError(""); }}
           className={`flex-1 text-sm font-medium py-2 rounded-md transition-colors ${
-            mode === "first"
-              ? "bg-white dark:bg-slate-800 text-orange-700 dark:text-orange-400 shadow-sm"
-              : "text-slate-500 dark:text-slate-400"
+            mode === "first" ? "bg-white text-orange-700 shadow-sm" : "text-slate-500"
           }`}
         >
           First time
@@ -92,7 +88,7 @@ export function JoinForm({ prefilledGymCode }: JoinFormProps) {
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="space-y-2">
-          <Label htmlFor="name" className="text-slate-700 dark:text-slate-200 font-medium">Your Name</Label>
+          <Label htmlFor="name" className="text-slate-700 font-medium">Your Name</Label>
           <Input
             id="name"
             placeholder="e.g. Jordan Smith"
@@ -100,12 +96,12 @@ export function JoinForm({ prefilledGymCode }: JoinFormProps) {
             onChange={(e) => setName(e.target.value)}
             disabled={loading}
             autoComplete="name"
-            className="border-slate-300 dark:border-slate-600 focus:border-orange-500 focus:ring-orange-500"
+            className="border-slate-300 focus:border-orange-500 focus:ring-orange-500"
           />
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="password" className="text-slate-700 dark:text-slate-200 font-medium">Password</Label>
+          <Label htmlFor="password" className="text-slate-700 font-medium">Password</Label>
           <Input
             id="password"
             type="password"
@@ -113,27 +109,27 @@ export function JoinForm({ prefilledGymCode }: JoinFormProps) {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             disabled={loading}
-            className="border-slate-300 dark:border-slate-600 focus:border-orange-500 focus:ring-orange-500"
+            className="border-slate-300 focus:border-orange-500 focus:ring-orange-500"
           />
         </div>
 
         {mode === "first" && (
           <div className="space-y-2">
-            <Label htmlFor="gym" className="text-slate-700 dark:text-slate-200 font-medium">Gym Code</Label>
+            <Label htmlFor="gym" className="text-slate-700 font-medium">Gym Code</Label>
             <Input
               id="gym"
               placeholder="e.g. OTF4K2"
               value={gymCode}
               onChange={(e) => setGymCode(e.target.value.toUpperCase())}
               disabled={loading || !!prefilledGymCode}
-              className="border-slate-300 dark:border-slate-600 focus:border-orange-500 focus:ring-orange-500 uppercase tracking-widest"
+              className="border-slate-300 focus:border-orange-500 focus:ring-orange-500 uppercase tracking-widest"
             />
-            <p className="text-xs text-slate-400 dark:text-slate-500">Ask your gym for the code, or scan their QR code.</p>
+            <p className="text-xs text-slate-400">Ask your gym for the code, or scan their QR code.</p>
           </div>
         )}
 
         {error && (
-          <p className="text-sm text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/40 rounded-lg px-3 py-2 border border-red-200 dark:border-red-800">{error}</p>
+          <p className="text-sm text-red-600 bg-red-50 rounded-lg px-3 py-2 border border-red-200">{error}</p>
         )}
 
         <Button

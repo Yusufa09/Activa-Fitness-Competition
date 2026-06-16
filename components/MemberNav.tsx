@@ -11,7 +11,7 @@ import { useTheme } from "@/components/ThemeProvider";
 export function MemberNav() {
   const pathname = usePathname();
   const router = useRouter();
-  const { theme, toggle } = useTheme();
+  const { theme, toggle, resetToLight } = useTheme();
   const [gymName, setGymName] = useState("");
   const [bodyScan, setBodyScan] = useState(false);
   const [confirming, setConfirming] = useState(false);
@@ -48,6 +48,7 @@ export function MemberNav() {
       }
     }
     clearSession();
+    resetToLight(); // next sign-in always starts in light mode
     router.replace("/");
   }
 
